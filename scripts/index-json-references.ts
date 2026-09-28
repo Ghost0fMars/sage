@@ -6,8 +6,9 @@
  *   npx ts-node --project tsconfig.scripts.json scripts/index-json-references.ts
  *
  * Prérequis :
- *   - supabase/migration-rag.sql exécuté dans Supabase > SQL Editor
- *   - .env.local avec OPENAI_API_KEY, NEXT_PUBLIC_SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY
+ *   - supabase/migration-rag.sql PUIS supabase/migration-albert-embeddings.sql exécutés
+ *     dans Supabase > SQL Editor
+ *   - .env.local avec ALBERT_API_KEY, NEXT_PUBLIC_SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY
  */
 
 import { config } from "dotenv";
@@ -19,7 +20,7 @@ import { readFileSync } from "fs";
 import { join } from "path";
 import { createClient } from "@supabase/supabase-js";
 
-const OPENAI_API_KEY       = process.env.OPENAI_API_KEY ?? "";
+const ALBERT_API_KEY       = process.env.ALBERT_API_KEY ?? "";
 const SUPABASE_URL         = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY ?? "";
 
@@ -31,13 +32,13 @@ type EmbeddingResponse = {
 };
 
 async function embedBatch(texts: string[]): Promise<number[][]> {
-  const response = await fetch("https://api.openai.com/v1/embeddings", {
+  const response = await fetch("https://albert.api.etalab.gouv.fr/v1/embeddings", {
     method: "POST",
     headers: {
-      Authorization: `Bearer ${OPENAI_API_KEY}`,
+      Authorization: `Bearer ${ALBERT_API_KEY}`,
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ model: "text-embedding-3-small", input: texts }),
+    body: JSON.stringify({ model: "bge-m3", input: texts }),
   });
 
   if (!response.ok) {
@@ -173,10 +174,10 @@ async function indexJsonFile(
 // ─── Point d'entrée ────────────────────────────────────────────────────────
 
 async function main() {
-  if (!OPENAI_API_KEY || !SUPABASE_URL || !SUPABASE_SERVICE_KEY) {
+  if (!ALBERT_API_KEY || !SUPABASE_URL || !SUPABASE_SERVICE_KEY) {
     console.error(
       "Variables manquantes dans .env.local :\n" +
-      "  OPENAI_API_KEY, NEXT_PUBLIC_SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY"
+      "  ALBERT_API_KEY, NEXT_PUBLIC_SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY"
     );
     process.exit(1);
   }
@@ -185,7 +186,7 @@ async function main() {
 
   const files = Object.keys(FORMATTERS);
   console.log(`\nIndexation de ${files.length} fichiers JSON de références...`);
-  console.log(`Modèle : text-embedding-3-small\n`);
+  console.log(`Modèle : bge-m3 (Albert API)\n`);
 
   let success = 0;
   for (const file of files) {

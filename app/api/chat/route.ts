@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
-import { callAiProvider, type AiProvider } from "../../lib/ai-provider";
+import { callAlbert, callAlbertEmbedding } from "../../lib/ai-provider";
 
 type Message = {
   role: "user" | "assistant";
@@ -8,38 +8,14 @@ type Message = {
 };
 
 type ChatRequest = {
-  aiProvider?: string;
-  aiApiKey?: string;
   messages: Message[];
   context: string;
-};
-
-type OpenAIOutputContent = {
-  type?: string;
-  text?: string;
-};
-
-type OpenAIOutputItem = {
-  content?: OpenAIOutputContent[];
-};
-
-type OpenAIResponse = {
-  output?: OpenAIOutputItem[];
 };
 
 type DocumentChunk = {
   content: string;
   similarity: number;
 };
-
-function extraireTexteOpenAI(data: OpenAIResponse) {
-  return (
-    data.output
-      ?.flatMap((item) => item.content ?? [])
-      .find((content) => content.type === "output_text")
-      ?.text?.trim() ?? ""
-  );
-}
 
 function getBearerToken(request: NextRequest) {
   const authorization = request.headers.get("authorization");
@@ -52,7 +28,9 @@ async function verifierUtilisateur(request: NextRequest) {
   const token = getBearerToken(request);
 
   if (!supabaseUrl || !supabaseAnonKey) {
-    return { error: "Supabase n'est pas configuré.", status: 500 } as const;
+    // Application locale (Electron) sans Supabase configuré : pas de compte à
+    // vérifier, l'accès à l'assistant est ouvert (comme le reste de l'app).
+    return { user: null } as const;
   }
 
   if (!token) {
@@ -83,7 +61,7 @@ async function verifierUtilisateur(request: NextRequest) {
   return { user: data.user } as const;
 }
 
-async function rechercherDocumentation(question: string, apiKey: string): Promise<string> {
+async function rechercherDocumentation(question: string): Promise<string> {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
@@ -91,26 +69,7 @@ async function rechercherDocumentation(question: string, apiKey: string): Promis
     return "";
   }
 
-  const embeddingResponse = await fetch("https://api.openai.com/v1/embeddings", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      model: "text-embedding-3-small",
-      input: question
-    })
-  });
-
-  if (!embeddingResponse.ok) {
-    return "";
-  }
-
-  const embeddingData = (await embeddingResponse.json()) as {
-    data: { embedding: number[] }[];
-  };
-  const embedding = embeddingData.data[0]?.embedding;
+  const embedding = await callAlbertEmbedding(question);
 
   if (!embedding) {
     return "";
@@ -160,7 +119,7 @@ Consignes :
 
 export async function POST(request: NextRequest) {
   const body = (await request.json()) as ChatRequest;
-  const { aiProvider, aiApiKey, messages, context } = body;
+  const { messages, context } = body;
 
   if (!Array.isArray(messages) || messages.length === 0) {
     return NextResponse.json({ error: "Le message est obligatoire." }, { status: 400 });
@@ -181,101 +140,29 @@ export async function POST(request: NextRequest) {
     ? `[Historique de la conversation]\n${historique}\n\n[Nouveau message]\nEnseignant : ${dernierMessage}`
     : dernierMessage;
 
-  if (aiProvider && aiApiKey && aiProvider !== "none") {
-    // RAG : on utilise la clé OpenAI du serveur pour les embeddings,
-    // quelle que soit le provider choisi par l'utilisateur
-    const embeddingKey =
-      aiProvider === "openai" ? aiApiKey : (process.env.OPENAI_API_KEY ?? "");
-    const docContext = embeddingKey
-      ? await rechercherDocumentation(dernierMessage, embeddingKey).catch(() => "")
-      : "";
-
-    const instructions = buildSystemPrompt(context, docContext);
-
-    try {
-      const content = await callAiProvider({
-        provider: aiProvider as AiProvider,
-        apiKey: aiApiKey,
-        system: instructions,
-        prompt: userPrompt,
-        maxTokens: 2500
-      });
-
-      if (!content) {
-        return NextResponse.json(
-          { error: "L'IA n'a pas renvoyé de texte exploitable." },
-          { status: 502 }
-        );
-      }
-
-      return NextResponse.json({ content });
-    } catch (error) {
-      return NextResponse.json(
-        { error: error instanceof Error ? error.message : "Erreur lors de l'appel à l'IA." },
-        { status: 500 }
-      );
-    }
-  }
-
-  if (aiProvider === "none") {
-    return NextResponse.json(
-      {
-        error:
-          "L'assistant IA n'est pas configuré. Rendez-vous dans les Paramètres pour choisir un fournisseur."
-      },
-      { status: 400 }
-    );
-  }
-
-  const apiKey = process.env.OPENAI_API_KEY;
-
-  if (!apiKey) {
-    return NextResponse.json(
-      { error: "Aucune IA configurée. Veuillez choisir un fournisseur IA dans les Paramètres." },
-      { status: 500 }
-    );
-  }
-
   const auth = await verifierUtilisateur(request);
   if ("error" in auth) {
     return NextResponse.json({ error: auth.error }, { status: auth.status });
   }
 
-  const docContext = await rechercherDocumentation(dernierMessage, apiKey).catch(() => "");
+  const docContext = await rechercherDocumentation(dernierMessage).catch(() => "");
   const instructions = buildSystemPrompt(context, docContext);
 
-  const response = await fetch("https://api.openai.com/v1/responses", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      model: process.env.OPENAI_MODEL ?? "gpt-4o-mini",
-      instructions,
-      input: userPrompt,
-      max_output_tokens: 2500,
-      reasoning: { effort: "none" }
-    })
-  });
+  try {
+    const content = await callAlbert(instructions, userPrompt, 2500);
 
-  if (!response.ok) {
-    const details = await response.text();
+    if (!content) {
+      return NextResponse.json(
+        { error: "L'IA n'a pas renvoyé de texte exploitable." },
+        { status: 502 }
+      );
+    }
+
+    return NextResponse.json({ content });
+  } catch (error) {
     return NextResponse.json(
-      { error: "Erreur lors de l'appel à l'API OpenAI.", details },
-      { status: response.status }
+      { error: error instanceof Error ? error.message : "Erreur lors de l'appel à l'IA." },
+      { status: 500 }
     );
   }
-
-  const data = (await response.json()) as OpenAIResponse;
-  const content = extraireTexteOpenAI(data);
-
-  if (!content) {
-    return NextResponse.json(
-      { error: "L'API OpenAI n'a pas renvoyé de texte exploitable." },
-      { status: 502 }
-    );
-  }
-
-  return NextResponse.json({ content });
 }

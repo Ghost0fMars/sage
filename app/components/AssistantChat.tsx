@@ -3,7 +3,6 @@
 import { useEffect, useRef, useState } from "react";
 import { supabase } from "../lib/supabase-client";
 import { readUserData } from "../lib/user-storage";
-import { readAiConfig } from "../lib/ai-config";
 
 type Message = {
   role: "user" | "assistant";
@@ -184,14 +183,6 @@ export default function AssistantChat() {
     setStreaming(true);
 
     try {
-      const aiConfig = readAiConfig();
-
-      if (!aiConfig || aiConfig.provider === "none") {
-        throw new Error(
-          "L'assistant IA n'est pas configuré. Rendez-vous dans les Paramètres pour choisir un fournisseur."
-        );
-      }
-
       const { data } = supabase ? await supabase.auth.getSession() : { data: { session: null } };
       const token = data.session?.access_token;
 
@@ -205,9 +196,7 @@ export default function AssistantChat() {
         headers,
         body: JSON.stringify({
           messages: newMessages,
-          context,
-          aiProvider: aiConfig.provider,
-          aiApiKey: aiConfig.apiKey
+          context
         })
       });
 

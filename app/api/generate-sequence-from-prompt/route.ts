@@ -1,15 +1,8 @@
-import { NextRequest, NextResponse } from "next/server";
-import { callAiProvider, type AiProvider } from "../../lib/ai-provider";
+import { NextResponse } from "next/server";
+import { callAlbert } from "../../lib/ai-provider";
 import { lireObjetJsonIa } from "../../lib/ai-json";
-import {
-  getUserFromRequest,
-  checkAndIncrementFreeGenerations,
-  FREE_GENERATIONS_MAX
-} from "../../lib/supabase-server";
 
 type GenerateFromPromptRequest = {
-  aiProvider?: string;
-  aiApiKey?: string;
   promptLibre: string;
 };
 
@@ -57,28 +50,6 @@ type GenerateFromPromptResult = {
   contexte: Contexte;
   sequence: Sequence;
 };
-
-type OpenAIOutputContent = {
-  type?: string;
-  text?: string;
-};
-
-type OpenAIOutputItem = {
-  content?: OpenAIOutputContent[];
-};
-
-type OpenAIResponse = {
-  output?: OpenAIOutputItem[];
-};
-
-function extraireTexteOpenAI(data: OpenAIResponse) {
-  return (
-    data.output
-      ?.flatMap((item) => item.content ?? [])
-      .find((content) => content.type === "output_text")
-      ?.text?.trim() ?? ""
-  );
-}
 
 function sequenceValide(sequence: Sequence): boolean {
   if (typeof sequence.titre !== "string") return false;
@@ -204,9 +175,9 @@ function parseResult(texte: string): GenerateFromPromptResult {
   return result;
 }
 
-export async function POST(request: NextRequest) {
+export async function POST(request: Request) {
   const body = (await request.json()) as GenerateFromPromptRequest;
-  const { aiProvider, aiApiKey, promptLibre } = body;
+  const { promptLibre } = body;
 
   if (!promptLibre?.trim()) {
     return NextResponse.json(
@@ -218,81 +189,15 @@ export async function POST(request: NextRequest) {
   const systemPrompt = buildSystemPrompt();
   const prompt = `Génère une séquence pédagogique à partir de cette demande :\n\n"${promptLibre.trim()}"`;
 
-  if (aiProvider && aiApiKey && aiProvider !== "none") {
-    try {
-      const texte = await callAiProvider({
-        provider: aiProvider as AiProvider,
-        apiKey: aiApiKey,
-        system: systemPrompt,
-        prompt,
-        maxTokens: 4500
-      });
-
-      const result = parseResult(texte);
-      return NextResponse.json(result);
-    } catch (error) {
-      return NextResponse.json(
-        { error: error instanceof Error ? error.message : "Erreur lors de l'appel à l'IA." },
-        { status: 502 }
-      );
-    }
-  }
-
-  if (aiProvider === "none") {
+  let texte: string;
+  try {
+    texte = await callAlbert(systemPrompt, prompt, 4500);
+  } catch (error) {
     return NextResponse.json(
-      {
-        error:
-          "L'assistant IA n'est pas configuré. Rendez-vous dans les Paramètres pour choisir un fournisseur."
-      },
-      { status: 400 }
+      { error: error instanceof Error ? error.message : "Erreur lors de l'appel à l'IA." },
+      { status: 502 }
     );
   }
-
-  const user = await getUserFromRequest(request);
-  if (user) {
-    const { allowed, used } = await checkAndIncrementFreeGenerations(user.id);
-    if (!allowed) {
-      return NextResponse.json(
-        { error: "FREE_LIMIT_REACHED", generationsUsed: used, generationsMax: FREE_GENERATIONS_MAX },
-        { status: 403 }
-      );
-    }
-  }
-
-  const apiKey = process.env.OPENAI_API_KEY;
-
-  if (!apiKey) {
-    return NextResponse.json(
-      { error: "Aucune IA configurée. Veuillez choisir un fournisseur IA dans les Paramètres." },
-      { status: 500 }
-    );
-  }
-
-  const response = await fetch("https://api.openai.com/v1/responses", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      model: process.env.OPENAI_MODEL ?? "gpt-4o-mini",
-      instructions: systemPrompt,
-      input: prompt,
-      max_output_tokens: 4500,
-      reasoning: { effort: "none" }
-    })
-  });
-
-  if (!response.ok) {
-    const details = await response.text();
-    return NextResponse.json(
-      { error: "Erreur lors de l'appel à l'API OpenAI.", details },
-      { status: response.status }
-    );
-  }
-
-  const data = (await response.json()) as OpenAIResponse;
-  const texte = extraireTexteOpenAI(data);
 
   try {
     const result = parseResult(texte);

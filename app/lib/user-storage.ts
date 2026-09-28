@@ -25,7 +25,6 @@ export const SYNCED_DATA_KEYS = [
   "sage-evaluations",
   "sage-student-notes",
   "sage-student-photos",
-  "sage-ai-config",
   "sage-reglement-interieur"
 ];
 

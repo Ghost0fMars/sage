@@ -12,9 +12,11 @@ Développée avec Next.js, TypeScript et Tailwind CSS.
 
 ## ⚠️ Données personnelles & RGPD — à lire avant de l'utiliser
 
-Dans son état actuel, SAGE peut faire transiter des données par un service hébergé (Supabase). **Pendant la bêta, n'entrez pas de données réelles permettant d'identifier des élèves** (noms, prénoms, évaluations nominatives). Utilisez des données de test ou anonymisées (« Élève 1 », « Élève 2 »…).
+**En application de bureau (recommandé, voir ci-dessous)**, SAGE fonctionne en local : les données des élèves restent sur la machine de l'enseignant (navigateur/stockage local de l'app), sans compte ni service cloud. Seul le texte envoyé à l'assistant IA transite par **Albert API** (DINUM/Etalab), hébergée par l'État français (SecNumCloud).
 
-La trajectoire du projet est un fonctionnement **100 % local** (voir la [feuille de route](#feuille-de-route)), où aucune donnée ne quittera la machine de l'utilisateur. Tant que cette bascule n'est pas faite, considérez cette consigne comme stricte.
+**En version web** (`npm run dev`/déploiement navigateur), SAGE peut en plus faire transiter des données par un service hébergé (Supabase) si celui-ci est configuré. **Pendant la bêta, n'entrez pas de données réelles permettant d'identifier des élèves** (noms, prénoms, évaluations nominatives) dans ce mode. Utilisez des données de test ou anonymisées (« Élève 1 », « Élève 2 »…).
+
+Dans tous les modes : ne collez jamais de données personnelles non anonymisées dans l'assistant IA sans nécessité, la souveraineté de l'hébergement ne dispense pas de la minimisation des données.
 
 ---
 
@@ -40,7 +42,7 @@ La trajectoire du projet est un fonctionnement **100 % local** (voir la [feuille
 - **Next.js** (App Router) — framework React
 - **TypeScript**
 - **Tailwind CSS**
-- **API OpenAI** — génération de contenu pédagogique
+- **Albert API** (DINUM / Etalab) — génération de contenu pédagogique, IA souveraine hébergée par l'État
 - **Supabase** — persistance (en cours de remplacement, cf. feuille de route)
 - **Electron** — empaquetage application de bureau (en cours)
 
@@ -49,7 +51,7 @@ La trajectoire du projet est un fonctionnement **100 % local** (voir la [feuille
 ## Prérequis
 
 - **Node.js** 18 ou supérieur et **npm**
-- Une **clé API OpenAI** (chaque utilisateur fournit la sienne — *Bring Your Own Key*)
+- Une **clé API Albert** (agents publics uniquement — voir [albert.api.etalab.gouv.fr](https://albert.api.etalab.gouv.fr)), configurée côté serveur
 - Un **projet Supabase** (le temps de la migration vers un stockage local)
 
 ---
@@ -70,14 +72,14 @@ Créez un fichier `.env.local` à la racine du projet. Ce fichier est ignoré pa
 
 Un modèle est fourni dans `.env.example`.
 
-### OpenAI
+### Albert API
 
 ```env
-OPENAI_API_KEY=votre_cle_api_openai
-OPENAI_MODEL=gpt-5.4-mini
+ALBERT_API_KEY=votre_cle_api_albert
+ALBERT_MODEL=deepseek-v4-flash
 ```
 
-La clé reste côté serveur grâce aux routes API (`app/api/.../route.ts`) et n'est jamais exposée au navigateur.
+La clé reste côté serveur grâce aux routes API (`app/api/.../route.ts`) et n'est jamais exposée au navigateur. Il n'y a plus de modèle BYOK : tous les enseignants utilisent la même clé Albert, gérée par l'administrateur du service.
 
 ### Supabase
 
@@ -107,6 +109,33 @@ Puis ouvrez [http://localhost:3000](http://localhost:3000).
 
 ---
 
+## Application de bureau (Electron) — mode recommandé pour les enseignants
+
+C'est le mode d'usage visé : un enseignant installe SAGE comme une application native, sans navigateur, sans compte à créer, sans connexion. Toutes les données (élèves, séances, planning...) restent sur sa machine ; seul le texte envoyé à l'assistant transite par Albert API.
+
+### Construire l'installateur
+
+1. Créer `.env.electron` à la racine (à partir de `.env.electron.example`) avec la clé `ALBERT_API_KEY` à embarquer dans l'application distribuée — **une seule clé partagée par tous les enseignants qui installeront ce build**, jamais demandée à l'utilisateur.
+2. Lancer la commande correspondant à la plateforme cible :
+
+   ```bash
+   npm run electron:dist:win     # Windows (.exe, NSIS)
+   npm run electron:dist:mac     # macOS (.dmg)
+   npm run electron:dist:linux   # Linux (AppImage)
+   ```
+
+   L'installateur est généré dans `dist-electron/`.
+
+### Comment ça marche
+
+- `scripts/electron-prepare.mjs` construit Next.js en mode `standalone` en forçant les variables `NEXT_PUBLIC_SUPABASE_*` à vide (même si `.env.local` en définit pour le développement web) : le build packagé n'affiche donc **jamais** d'écran de connexion, quoi qu'il arrive. Il copie ensuite `.env.electron` dans le dossier standalone (`albert.env`).
+- Au lancement, `electron/main.js` démarre ce serveur Next.js en local (`127.0.0.1`, port interne) et ouvre une fenêtre native pointant dessus — `electron/server-runner.js` charge `albert.env` avant de démarrer le serveur.
+- `npm run electron:dev` permet de tester ce comportement en développement (fenêtre Electron + `next dev`).
+
+⚠️ La clé Albert embarquée est extractible par quiconque décompile l'installateur (c'est une conséquence du modèle « une clé partagée, zéro configuration »). Adapté à une diffusion maîtrisée (établissement, département) ; à revoir avant une diffusion grand public non contrôlée.
+
+---
+
 ## Structure du projet
 
 ```
@@ -118,9 +147,9 @@ app/
   eleves/page.tsx               Tableau de suivi des élèves
   progression/page.tsx          Suivi des évaluations et niveaux d'acquisition
   parametres/page.tsx           Choix / création de l'utilisateur local actif
-  api/generate-objective/       Route serveur — objectif pédagogique (OpenAI)
-  api/generate-sequence/        Route serveur — progression de séquence (OpenAI)
-  api/generate-lesson/          Route serveur — séance détaillée (OpenAI)
+  api/generate-objective/       Route serveur — objectif pédagogique (Albert API)
+  api/generate-sequence/        Route serveur — progression de séquence (Albert API)
+  api/generate-lesson/          Route serveur — séance détaillée (Albert API)
   lib/user-storage.ts           Lecture / écriture locale par utilisateur
   layout.tsx                    Structure globale de l'application
   globals.css                   Styles globaux + Tailwind
@@ -134,18 +163,21 @@ Référentiel_de_compétences.json Données du référentiel (issu de l'ancien E
 ## Commandes utiles
 
 ```bash
-npm run dev      # serveur de développement
-npm run build    # build de production
-npm run lint     # vérification du code
+npm run dev                   # serveur de développement (web)
+npm run build                 # build de production (web)
+npm run lint                  # vérification du code
+npm run electron:dev          # app de bureau en développement
+npm run electron:dist:win     # installateur Windows
+npm run electron:dist:mac     # installateur macOS
+npm run electron:dist:linux   # installateur Linux
 ```
 
 ---
 
 ## Feuille de route
 
-- [ ] **Passage en stockage 100 % local** (SQLite via `better-sqlite3`) et retrait de Supabase — pour que les données ne quittent jamais la machine de l'utilisateur (objectif RGPD).
-- [ ] **Build Electron** distribuable, sans dépendance à un service en ligne.
-- [ ] Modèle **BYOK** généralisé : chaque utilisateur configure sa propre clé OpenAI en local.
+- [x] **Build Electron** distribuable, sans dépendance à un service en ligne — voir [Application de bureau](#application-de-bureau-electron--mode-recommandé-pour-les-enseignants).
+- [ ] **Passage en stockage structuré local** (SQLite via `better-sqlite3`) en remplacement du `localStorage` du navigateur embarqué — même philosophie (rien ne quitte la machine), mais plus robuste et interrogeable que le stockage clé-valeur actuel.
 
 ---
 

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { callAiProvider, type AiProvider } from "../../lib/ai-provider";
+import { callAlbert } from "../../lib/ai-provider";
 import { lireObjetJsonIa } from "../../lib/ai-json";
 import { buildReferencesContext } from "../../lib/references";
 
@@ -23,8 +23,6 @@ type SeanceSequence = {
 };
 
 type GenerateLessonRequest = {
-  aiProvider?: string;
-  aiApiKey?: string;
   cycle?: string;
   niveau?: string;
   domaine?: string;
@@ -58,28 +56,6 @@ type SeanceDetaillee = {
   trace_ecrite: string;
   vigilance: string;
 };
-
-type OpenAIOutputContent = {
-  type?: string;
-  text?: string;
-};
-
-type OpenAIOutputItem = {
-  content?: OpenAIOutputContent[];
-};
-
-type OpenAIResponse = {
-  output?: OpenAIOutputItem[];
-};
-
-function extraireTexteOpenAI(data: OpenAIResponse) {
-  return (
-    data.output
-      ?.flatMap((item) => item.content ?? [])
-      .find((content) => content.type === "output_text")
-      ?.text?.trim() ?? ""
-  );
-}
 
 function seanceValide(seance: SeanceDetaillee) {
   return (
@@ -161,7 +137,7 @@ Retourne UNIQUEMENT un JSON valide, sans Markdown :
 }
 </format_sortie>`;
 
-function buildPrompt(contexte: Omit<GenerateLessonRequest, "aiProvider" | "aiApiKey">) {
+function buildPrompt(contexte: GenerateLessonRequest) {
   const s = contexte.seance!;
   const beatInfo = s.beat
     ? `- Structure prévue :
@@ -203,7 +179,7 @@ ${differenciationInfo}`;
 
 export async function POST(request: Request) {
   const body = (await request.json()) as GenerateLessonRequest;
-  const { aiProvider, aiApiKey, ...contexte } = body;
+  const contexte = body;
 
   if (
     !contexte.cycle ||
@@ -232,73 +208,18 @@ export async function POST(request: Request) {
     return seance;
   }
 
-  if (aiProvider && aiApiKey && aiProvider !== "none") {
-    try {
-      const texte = await callAiProvider({
-        provider: aiProvider as AiProvider,
-        apiKey: aiApiKey,
-        system: systemPrompt,
-        prompt,
-        maxTokens: 2800
-      });
-
-      const seance = parseSeance(texte);
-      return NextResponse.json({ seance });
-    } catch (error) {
-      return NextResponse.json(
-        {
-          error: error instanceof Error ? error.message : "Erreur lors de l'appel à l'IA.",
-          details: ""
-        },
-        { status: 500 }
-      );
-    }
-  }
-
-  if (aiProvider === "none") {
+  let texte: string;
+  try {
+    texte = await callAlbert(systemPrompt, prompt, 2800);
+  } catch (error) {
     return NextResponse.json(
       {
-        error:
-          "L'assistant IA n'est pas configuré. Rendez-vous dans les Paramètres pour choisir un fournisseur."
+        error: error instanceof Error ? error.message : "Erreur lors de l'appel à l'IA.",
+        details: ""
       },
-      { status: 400 }
-    );
-  }
-
-  const apiKey = process.env.OPENAI_API_KEY;
-
-  if (!apiKey) {
-    return NextResponse.json(
-      { error: "Aucune IA configurée. Veuillez choisir un fournisseur IA dans les Paramètres." },
       { status: 500 }
     );
   }
-
-  const response = await fetch("https://api.openai.com/v1/responses", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      model: process.env.OPENAI_MODEL ?? "gpt-4o-mini",
-      instructions: systemPrompt,
-      input: prompt,
-      max_output_tokens: 2800,
-      reasoning: { effort: "none" }
-    })
-  });
-
-  if (!response.ok) {
-    const details = await response.text();
-    return NextResponse.json(
-      { error: "Erreur lors de l'appel à l'API OpenAI.", details },
-      { status: response.status }
-    );
-  }
-
-  const data = (await response.json()) as OpenAIResponse;
-  const texte = extraireTexteOpenAI(data);
 
   try {
     const seance = parseSeance(texte);

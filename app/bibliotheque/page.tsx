@@ -2,7 +2,6 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { getDisciplineColor } from "../lib/discipline-colors";
-import { readAiConfig } from "../lib/ai-config";
 import { readUserData, writeUserData } from "../lib/user-storage";
 import FicheSeanceModal, { type SeanceDetaillee } from "../components/FicheSeanceModal";
 import FicheEleveViewer from "../components/FicheEleveViewer";
@@ -345,7 +344,6 @@ export default function BibliothequePage() {
     setMessage("");
 
     try {
-      const aiConfig = readAiConfig();
       const response = await fetch("/api/generate-lesson", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -357,9 +355,7 @@ export default function BibliothequePage() {
           item: sequence.item,
           competence: sequence.competence,
           objectifSequence: sequence.objectif,
-          seance,
-          aiProvider: aiConfig?.provider,
-          aiApiKey: aiConfig?.apiKey
+          seance
         })
       });
 
@@ -484,7 +480,6 @@ export default function BibliothequePage() {
     setMessage("");
 
     try {
-      const aiConfig = readAiConfig();
       const response = await fetch("/api/generate-student-activity", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -497,9 +492,7 @@ export default function BibliothequePage() {
           competence: fiche.competence,
           sequenceTitle: fiche.sequenceTitle,
           seanceNumero: fiche.seanceNumero,
-          lesson,
-          aiProvider: aiConfig?.provider,
-          aiApiKey: aiConfig?.apiKey
+          lesson
         })
       });
 
@@ -545,7 +538,6 @@ export default function BibliothequePage() {
     setMessage("");
 
     try {
-      const aiConfig = readAiConfig();
       const response = await fetch("/api/generate-course", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -558,9 +550,7 @@ export default function BibliothequePage() {
           competence: fiche.competence,
           sequenceTitle: fiche.sequenceTitle,
           seanceNumero: fiche.seanceNumero,
-          lesson,
-          aiProvider: aiConfig?.provider,
-          aiApiKey: aiConfig?.apiKey
+          lesson
         })
       });
 

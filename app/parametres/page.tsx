@@ -1,7 +1,6 @@
 "use client";
 
 import { FormEvent, useEffect, useRef, useState } from "react";
-import { AiConfigForm } from "../components/AiConfigModal";
 import { readUserData, writeUserData } from "../lib/user-storage";
 import { extraireTextePdf } from "../lib/pdf-text";
 
@@ -228,12 +227,10 @@ export default function ParametresPage() {
         <section className="mt-6 rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
           <h2 className="text-xl font-bold text-slate-950">Assistant IA</h2>
           <p className="mt-2 leading-7 text-slate-700">
-            Choisissez le fournisseur IA et collez votre clé API. La clé est stockée uniquement sur
-            votre ordinateur et n&apos;est jamais transmise à nos serveurs.
+            L&apos;assistant IA de Sage est propulsé par <strong>Albert</strong>, l&apos;API
+            d&apos;intelligence artificielle de l&apos;État (DINUM / Etalab). Aucune clé à
+            configurer : les données restent hébergées en France, sous droit français.
           </p>
-          <div className="mt-5">
-            <AiConfigForm />
-          </div>
         </section>
 
         <section className="mt-6 rounded-lg border border-slate-200 bg-white p-5 shadow-sm">

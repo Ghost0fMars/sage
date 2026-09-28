@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { lireObjetJsonIa } from "../../lib/ai-json";
-import { callAiProvider, type AiProvider } from "../../lib/ai-provider";
+import { callAlbert } from "../../lib/ai-provider";
 import { buildReferencesContext } from "../../lib/references";
 
 type PhaseSeanceDetaillee = {
@@ -47,8 +47,6 @@ type FicheActivite = {
 };
 
 type GenerateStudentActivityRequest = {
-  aiProvider?: string;
-  aiApiKey?: string;
   cycle?: string;
   niveau?: string;
   domaine?: string;
@@ -59,28 +57,6 @@ type GenerateStudentActivityRequest = {
   seanceNumero?: number;
   lesson?: SeanceDetaillee;
 };
-
-type OpenAIOutputContent = {
-  type?: string;
-  text?: string;
-};
-
-type OpenAIOutputItem = {
-  content?: OpenAIOutputContent[];
-};
-
-type OpenAIResponse = {
-  output?: OpenAIOutputItem[];
-};
-
-function extraireTexteOpenAI(data: OpenAIResponse) {
-  return (
-    data.output
-      ?.flatMap((item) => item.content ?? [])
-      .find((content) => content.type === "output_text")
-      ?.text?.trim() ?? ""
-  );
-}
 
 function ficheValide(fiche: FicheActivite) {
   return (
@@ -128,7 +104,7 @@ Retourne UNIQUEMENT un JSON valide, sans Markdown :
 }
 </format_sortie>`;
 
-function buildPrompt(contexte: Omit<GenerateStudentActivityRequest, "aiProvider" | "aiApiKey">) {
+function buildPrompt(contexte: GenerateStudentActivityRequest) {
   const lesson = contexte.lesson!;
   const phases = lesson.phases
     .map(
@@ -165,7 +141,7 @@ ${phases}`;
 
 export async function POST(request: Request) {
   const body = (await request.json()) as GenerateStudentActivityRequest;
-  const { aiProvider, aiApiKey, ...contexte } = body;
+  const contexte = body;
 
   if (!contexte.niveau || !contexte.domaine || !contexte.lesson?.titre) {
     return NextResponse.json(
@@ -191,69 +167,15 @@ export async function POST(request: Request) {
     return fiche;
   }
 
-  if (aiProvider && aiApiKey && aiProvider !== "none") {
-    try {
-      const texte = await callAiProvider({
-        provider: aiProvider as AiProvider,
-        apiKey: aiApiKey,
-        system: systemPrompt,
-        prompt,
-        maxTokens: 2200
-      });
-
-      return NextResponse.json({ activity: parseFiche(texte) });
-    } catch (error) {
-      return NextResponse.json(
-        { error: error instanceof Error ? error.message : "Erreur lors de l'appel à l'IA." },
-        { status: 500 }
-      );
-    }
-  }
-
-  if (aiProvider === "none") {
+  let texte: string;
+  try {
+    texte = await callAlbert(systemPrompt, prompt, 2200);
+  } catch (error) {
     return NextResponse.json(
-      {
-        error:
-          "L'assistant IA n'est pas configuré. Rendez-vous dans les Paramètres pour choisir un fournisseur."
-      },
-      { status: 400 }
-    );
-  }
-
-  const apiKey = process.env.OPENAI_API_KEY;
-
-  if (!apiKey) {
-    return NextResponse.json(
-      { error: "Aucune IA configurée. Veuillez choisir un fournisseur IA dans les Paramètres." },
+      { error: error instanceof Error ? error.message : "Erreur lors de l'appel à l'IA." },
       { status: 500 }
     );
   }
-
-  const response = await fetch("https://api.openai.com/v1/responses", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      model: process.env.OPENAI_MODEL ?? "gpt-4o-mini",
-      instructions: systemPrompt,
-      input: prompt,
-      max_output_tokens: 2200,
-      reasoning: { effort: "none" }
-    })
-  });
-
-  if (!response.ok) {
-    const details = await response.text();
-    return NextResponse.json(
-      { error: "Erreur lors de l'appel à l'API OpenAI.", details },
-      { status: response.status }
-    );
-  }
-
-  const data = (await response.json()) as OpenAIResponse;
-  const texte = extraireTexteOpenAI(data);
 
   try {
     return NextResponse.json({ activity: parseFiche(texte) });

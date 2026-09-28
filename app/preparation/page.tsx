@@ -3,8 +3,6 @@
 import { useEffect, useMemo, useState } from "react";
 import referentielBrut from "../../Référentiel_de_compétences.json";
 import { readUserData, writeUserData } from "../lib/user-storage";
-import { readAiConfig } from "../lib/ai-config";
-import { supabase } from "../lib/supabase-client";
 import FicheSeanceModal from "../components/FicheSeanceModal";
 import GeneratingLabel from "../components/GeneratingLabel";
 import { escapeHtml, ouvrirEtImprimer, printBaseStyles, printDocumentHeader } from "../lib/print-document";
@@ -362,22 +360,11 @@ export default function PagePreparation() {
     setObjectif("");
 
     try {
-      const aiConfig = readAiConfig();
-      const token =
-        !aiConfig && supabase
-          ? (await supabase.auth.getSession()).data.session?.access_token
-          : null;
-
       const response = await fetch("/api/generate-sequence-from-prompt", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          ...(token ? { Authorization: `Bearer ${token}` } : {})
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          promptLibre: promptLibre.trim(),
-          aiProvider: aiConfig?.provider,
-          aiApiKey: aiConfig?.apiKey
+          promptLibre: promptLibre.trim()
         })
       });
 
@@ -394,11 +381,6 @@ export default function PagePreparation() {
         sequence?: Sequence;
         error?: string;
       };
-
-      if (response.status === 403 && data.error === "FREE_LIMIT_REACHED") {
-        window.dispatchEvent(new CustomEvent("open-ai-config", { detail: { freeLimitReached: true } }));
-        throw new Error("Vous avez utilisé vos 3 générations gratuites.");
-      }
 
       if (!response.ok || !data.sequence) {
         throw new Error(data.error ?? "Impossible de générer la séquence.");
@@ -466,16 +448,13 @@ export default function PagePreparation() {
     setObjectif("");
 
     try {
-      const aiConfig = readAiConfig();
       const response = await fetch("/api/generate-objective", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           niveau: selection.niveau,
           domaine: selection.domaine,
-          competence: selection.competence,
-          aiProvider: aiConfig?.provider,
-          aiApiKey: aiConfig?.apiKey
+          competence: selection.competence
         })
       });
 
@@ -517,17 +496,9 @@ export default function PagePreparation() {
     setMessagePlanning("");
 
     try {
-      const aiConfig = readAiConfig();
-      const token = !aiConfig && supabase
-        ? (await supabase.auth.getSession()).data.session?.access_token
-        : null;
-
       const response = await fetch("/api/generate-sequence", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          ...(token ? { Authorization: `Bearer ${token}` } : {})
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           cycle: selection.cycle,
           niveau: selection.niveau,
@@ -536,18 +507,11 @@ export default function PagePreparation() {
           item: selection.item,
           competence: selection.competence,
           objectif,
-          typeSequence: "introduction",
-          aiProvider: aiConfig?.provider,
-          aiApiKey: aiConfig?.apiKey
+          typeSequence: "introduction"
         })
       });
 
       const data = (await response.json()) as { sequence?: Sequence; error?: string };
-
-      if (response.status === 403 && data.error === "FREE_LIMIT_REACHED") {
-        window.dispatchEvent(new CustomEvent("open-ai-config", { detail: { freeLimitReached: true } }));
-        throw new Error("Vous avez utilisé vos 3 générations gratuites.");
-      }
 
       if (!response.ok || !data.sequence) {
         throw new Error(data.error ?? "Impossible de générer la séquence.");
@@ -598,7 +562,6 @@ export default function PagePreparation() {
     setMessagePlanning("");
 
     try {
-      const aiConfig = readAiConfig();
       const response = await fetch("/api/generate-lesson", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -610,9 +573,7 @@ export default function PagePreparation() {
           item: selection.item,
           competence: selection.competence,
           objectifSequence: objectif,
-          seance,
-          aiProvider: aiConfig?.provider,
-          aiApiKey: aiConfig?.apiKey
+          seance
         })
       });
 
@@ -808,7 +769,6 @@ export default function PagePreparation() {
     setMessagePlanning("");
 
     try {
-      const aiConfig = readAiConfig();
       const response = await fetch("/api/generate-student-activity", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -821,9 +781,7 @@ export default function PagePreparation() {
           competence: selection.competence,
           sequenceTitle: sequence.titre,
           seanceNumero: seanceSource.numero,
-          lesson,
-          aiProvider: aiConfig?.provider,
-          aiApiKey: aiConfig?.apiKey
+          lesson
         })
       });
 
@@ -877,7 +835,6 @@ export default function PagePreparation() {
     setMessagePlanning("");
 
     try {
-      const aiConfig = readAiConfig();
       const response = await fetch("/api/generate-course", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -890,9 +847,7 @@ export default function PagePreparation() {
           competence: selection.competence,
           sequenceTitle: sequence.titre,
           seanceNumero: seanceSource.numero,
-          lesson,
-          aiProvider: aiConfig?.provider,
-          aiApiKey: aiConfig?.apiKey
+          lesson
         })
       });
 

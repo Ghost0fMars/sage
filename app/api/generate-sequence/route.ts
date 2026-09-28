@@ -1,16 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import { callAiProvider, type AiProvider } from "../../lib/ai-provider";
+import { callAlbert } from "../../lib/ai-provider";
 import { lireObjetJsonIa } from "../../lib/ai-json";
 import { buildReferencesContext } from "../../lib/references";
-import {
-  getUserFromRequest,
-  checkAndIncrementFreeGenerations,
-  FREE_GENERATIONS_MAX
-} from "../../lib/supabase-server";
 
 type GenerateSequenceRequest = {
-  aiProvider?: string;
-  aiApiKey?: string;
   typeSequence?: "introduction" | "consolidation" | "evaluation" | "projet";
   cycle?: string;
   niveau?: string;
@@ -50,28 +43,6 @@ type Sequence = {
   regime: string;
   seances: Seance[];
 };
-
-type OpenAIOutputContent = {
-  type?: string;
-  text?: string;
-};
-
-type OpenAIOutputItem = {
-  content?: OpenAIOutputContent[];
-};
-
-type OpenAIResponse = {
-  output?: OpenAIOutputItem[];
-};
-
-function extraireTexteOpenAI(data: OpenAIResponse) {
-  return (
-    data.output
-      ?.flatMap((item) => item.content ?? [])
-      .find((content) => content.type === "output_text")
-      ?.text?.trim() ?? ""
-  );
-}
 
 function sequenceValide(sequence: Sequence): boolean {
   if (typeof sequence.titre !== "string") return false;
@@ -212,10 +183,7 @@ Retourne UNIQUEMENT un JSON valide, sans Markdown :
 </format_sortie>${referencesContext}`;
 }
 
-function buildPrompt(
-  contexte: Omit<GenerateSequenceRequest, "aiProvider" | "aiApiKey">,
-  regime: string
-) {
+function buildPrompt(contexte: GenerateSequenceRequest, regime: string) {
   return `Crée une progression de séquence pédagogique (régime ${regime}) :
 - Cycle : ${contexte.cycle}
 - Niveau : ${contexte.niveau}
@@ -230,7 +198,7 @@ Détermine le nombre de séances nécessaire. Assure-toi qu'exactement une séan
 
 export async function POST(request: NextRequest) {
   const body = (await request.json()) as GenerateSequenceRequest;
-  const { aiProvider, aiApiKey, typeSequence, ...contexte } = body;
+  const { typeSequence, ...contexte } = body;
 
   if (
     !contexte.cycle ||
@@ -261,84 +229,18 @@ export async function POST(request: NextRequest) {
     return sequence;
   }
 
-  if (aiProvider && aiApiKey && aiProvider !== "none") {
-    try {
-      const texte = await callAiProvider({
-        provider: aiProvider as AiProvider,
-        apiKey: aiApiKey,
-        system: systemPrompt,
-        prompt,
-        maxTokens: 2800
-      });
-
-      const sequence = parseSequence(texte);
-      return NextResponse.json({ sequence });
-    } catch (error) {
-      return NextResponse.json(
-        {
-          error: error instanceof Error ? error.message : "Erreur lors de l'appel à l'IA.",
-          details: ""
-        },
-        { status: 502 }
-      );
-    }
-  }
-
-  if (aiProvider === "none") {
+  let texte: string;
+  try {
+    texte = await callAlbert(systemPrompt, prompt, 2800);
+  } catch (error) {
     return NextResponse.json(
       {
-        error:
-          "L'assistant IA n'est pas configuré. Rendez-vous dans les Paramètres pour choisir un fournisseur."
+        error: error instanceof Error ? error.message : "Erreur lors de l'appel à l'IA.",
+        details: ""
       },
-      { status: 400 }
+      { status: 502 }
     );
   }
-
-  const user = await getUserFromRequest(request);
-  if (user) {
-    const { allowed, used } = await checkAndIncrementFreeGenerations(user.id);
-    if (!allowed) {
-      return NextResponse.json(
-        { error: "FREE_LIMIT_REACHED", generationsUsed: used, generationsMax: FREE_GENERATIONS_MAX },
-        { status: 403 }
-      );
-    }
-  }
-
-  const apiKey = process.env.OPENAI_API_KEY;
-
-  if (!apiKey) {
-    return NextResponse.json(
-      { error: "Aucune IA configurée. Veuillez choisir un fournisseur IA dans les Paramètres." },
-      { status: 500 }
-    );
-  }
-
-  const response = await fetch("https://api.openai.com/v1/responses", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      model: process.env.OPENAI_MODEL ?? "gpt-4o-mini",
-      instructions: systemPrompt,
-      input: prompt,
-      max_output_tokens: 2800,
-      reasoning: { effort: "none" }
-    })
-  });
-
-  if (!response.ok) {
-    const details = await response.text();
-    return NextResponse.json(
-      { error: "Erreur lors de l'appel à l'API OpenAI.", details },
-      { status: response.status }
-    );
-  }
-
-  const data = (await response.json()) as OpenAIResponse;
-  const texte = extraireTexteOpenAI(data);
 
   try {
     const sequence = parseSequence(texte);

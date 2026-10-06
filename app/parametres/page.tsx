@@ -3,6 +3,7 @@
 import { FormEvent, useEffect, useRef, useState } from "react";
 import { readUserData, writeUserData } from "../lib/user-storage";
 import { extraireTextePdf } from "../lib/pdf-text";
+import { CLASSES_STORAGE_KEY, Classe, NIVEAUX_SCOLAIRES, lireClasses } from "../lib/classes";
 
 const PROFILE_KEY = "sage-profile";
 const REGLEMENT_STORAGE_KEY = "sage-reglement-interieur";
@@ -37,6 +38,7 @@ export default function ParametresPage() {
   const [reglementErreur, setReglementErreur] = useState("");
   const [reglementEnCours, setReglementEnCours] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
+  const [classes, setClasses] = useState<Classe[]>([]);
 
   useEffect(() => {
     try {
@@ -49,7 +51,30 @@ export default function ParametresPage() {
       // ignore
     }
     setReglement(readUserData<ReglementInterieur | null>(REGLEMENT_STORAGE_KEY, null));
+    setClasses(lireClasses());
   }, []);
+
+  function enregistrerClasses(prochainesClasses: Classe[]) {
+    setClasses(prochainesClasses);
+    writeUserData(CLASSES_STORAGE_KEY, prochainesClasses);
+  }
+
+  function modifierClasse(id: string, miseAJour: Partial<Classe>) {
+    enregistrerClasses(classes.map((classe) => (classe.id === id ? { ...classe, ...miseAJour } : classe)));
+  }
+
+  function basculerNiveau(classe: Classe, niveau: string) {
+    modifierClasse(classe.id, {
+      niveaux: classe.niveaux.includes(niveau)
+        ? classe.niveaux.filter((n) => n !== niveau)
+        : NIVEAUX_SCOLAIRES.filter((n) => n === niveau || classe.niveaux.includes(n))
+    });
+  }
+
+  function supprimerClasse(classe: Classe) {
+    if (!window.confirm(`Supprimer la classe « ${classe.nom} » ?`)) return;
+    enregistrerClasses(classes.filter((c) => c.id !== classe.id));
+  }
 
   function updateField(field: keyof Profile, value: string) {
     setForm((current) => ({ ...current, [field]: value }));
@@ -223,6 +248,72 @@ export default function ParametresPage() {
             </a>
           </div>
         </form>
+
+        <section className="mt-6 rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+          <h2 className="text-xl font-bold text-slate-950">Mes classes</h2>
+          <p className="mt-2 leading-7 text-slate-700">
+            Ajoutez chaque classe dont vous vous occupez et cochez ses niveaux : plusieurs niveaux
+            pour une classe multi-niveaux (ex. CE2-CM1), plusieurs classes au collège (ex. 5ème A,
+            4ème B). Les élèves et la préparation des séquences s&apos;y adaptent.
+          </p>
+
+          <div className="mt-5 grid gap-3">
+            {classes.map((classe) => (
+              <div key={classe.id} className="rounded-md border border-slate-200 bg-slate-50 p-4">
+                <div className="flex flex-wrap items-center gap-3">
+                  <input
+                    value={classe.nom}
+                    onChange={(event) => modifierClasse(classe.id, { nom: event.target.value })}
+                    aria-label="Nom de la classe"
+                    placeholder="Nom de la classe"
+                    className="min-w-0 flex-1 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-semibold outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-100"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => supprimerClasse(classe)}
+                    className="rounded-md bg-red-700 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-red-800 focus:outline-none focus:ring-2 focus:ring-teal-100"
+                  >
+                    Supprimer
+                  </button>
+                </div>
+                <fieldset className="mt-3 flex flex-wrap gap-2">
+                  <legend className="sr-only">Niveaux de {classe.nom}</legend>
+                  {NIVEAUX_SCOLAIRES.map((niveau) => (
+                    <label
+                      key={niveau}
+                      className={`cursor-pointer rounded-full border px-3 py-1 text-sm font-semibold transition has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-teal-300 ${
+                        classe.niveaux.includes(niveau)
+                          ? "border-teal-700 bg-teal-700 text-white"
+                          : "border-slate-300 bg-white text-slate-700 hover:bg-slate-100"
+                      }`}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={classe.niveaux.includes(niveau)}
+                        onChange={() => basculerNiveau(classe, niveau)}
+                        className="sr-only"
+                      />
+                      {niveau}
+                    </label>
+                  ))}
+                </fieldset>
+              </div>
+            ))}
+          </div>
+
+          <button
+            type="button"
+            onClick={() =>
+              enregistrerClasses([
+                ...classes,
+                { id: crypto.randomUUID(), nom: `Classe ${classes.length + 1}`, niveaux: [] }
+              ])
+            }
+            className="mt-4 rounded-md bg-teal-700 px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-teal-800"
+          >
+            Ajouter une classe
+          </button>
+        </section>
 
         <section className="mt-6 rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
           <h2 className="text-xl font-bold text-slate-950">Assistant IA</h2>

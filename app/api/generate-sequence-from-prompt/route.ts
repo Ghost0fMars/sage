@@ -1,9 +1,11 @@
 import { NextResponse } from "next/server";
 import { callAlbert } from "../../lib/ai-provider";
 import { lireObjetJsonIa } from "../../lib/ai-json";
+import { consigneMultiNiveaux } from "../../lib/multi-niveaux";
 
 type GenerateFromPromptRequest = {
   promptLibre: string;
+  niveauxClasse?: string[];
 };
 
 type Beat = {
@@ -187,7 +189,9 @@ export async function POST(request: Request) {
   }
 
   const systemPrompt = buildSystemPrompt();
-  const prompt = `Génère une séquence pédagogique à partir de cette demande :\n\n"${promptLibre.trim()}"`;
+  const prompt =
+    `Génère une séquence pédagogique à partir de cette demande :\n\n"${promptLibre.trim()}"` +
+    consigneMultiNiveaux(body.niveauxClasse);
 
   let texte: string;
   try {

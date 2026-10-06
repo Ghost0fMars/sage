@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { getDisciplineColor } from "../lib/discipline-colors";
 import { readUserData, writeUserData } from "../lib/user-storage";
+import { Classe, appartientALaClasse, lireClasses } from "../lib/classes";
 import FicheSeanceModal, { type SeanceDetaillee } from "../components/FicheSeanceModal";
 import FicheEleveViewer from "../components/FicheEleveViewer";
 import CoursViewer from "../components/CoursViewer";
@@ -242,6 +243,8 @@ export default function BibliothequePage() {
   const [preparationEnCours, setPreparationEnCours] = useState("");
   const [activiteEnCours, setActiviteEnCours] = useState("");
   const [coursEnCours, setCoursEnCours] = useState("");
+  const [classes, setClasses] = useState<Classe[]>([]);
+  const [classeFiltreId, setClasseFiltreId] = useState("");
 
   useEffect(() => {
     function chargerDonnees() {
@@ -265,6 +268,7 @@ export default function BibliothequePage() {
           COURSE_PRESENTATIONS_STORAGE_KEY
         ).map((c) => ({ ...c, course: migrerCoursLegacy(c.course) }))
       );
+      setClasses(lireClasses());
       setTuilesPlanning(
         readUserData<TuilePlanning[]>(PLANNING_STORAGE_KEY, [], PLANNING_STORAGE_KEY)
       );
@@ -279,8 +283,16 @@ export default function BibliothequePage() {
     };
   }, []);
 
+  const classeFiltree = classes.find((classe) => classe.id === classeFiltreId);
+  function filtrerParClasse<T extends { classeId?: string; niveau: string }>(items: T[]) {
+    return classeFiltree ? items.filter((item) => appartientALaClasse(item, classeFiltree)) : items;
+  }
+  const sequencesVisibles = filtrerParClasse(sequences);
+  const activitesVisibles = filtrerParClasse(activites);
+  const coursVisibles = filtrerParClasse(cours);
+
   const dossiers = useMemo(() => {
-    return sequences.reduce<DossierSequences>((acc, sequence) => {
+    return sequencesVisibles.reduce<DossierSequences>((acc, sequence) => {
       acc[sequence.cycle] ??= {};
       acc[sequence.cycle][sequence.niveau] ??= {};
       acc[sequence.cycle][sequence.niveau][sequence.domaine] ??= {};
@@ -288,10 +300,10 @@ export default function BibliothequePage() {
       acc[sequence.cycle][sequence.niveau][sequence.domaine][sequence.sousDomaine].push(sequence);
       return acc;
     }, {});
-  }, [sequences]);
+  }, [sequencesVisibles]);
 
   const dossiersActivites = useMemo(() => {
-    return activites.reduce<Record<string, Record<string, ActiviteEleveSauvegardee[]>>>((acc, a) => {
+    return activitesVisibles.reduce<Record<string, Record<string, ActiviteEleveSauvegardee[]>>>((acc, a) => {
       const niveau = a.niveau || "Niveau non défini";
       const domaine = a.domaine || "Domaine non défini";
       acc[niveau] ??= {};
@@ -299,10 +311,10 @@ export default function BibliothequePage() {
       acc[niveau][domaine].push(a);
       return acc;
     }, {});
-  }, [activites]);
+  }, [activitesVisibles]);
 
   const dossiersCours = useMemo(() => {
-    return cours.reduce<Record<string, Record<string, CoursSauvegarde[]>>>((acc, c) => {
+    return coursVisibles.reduce<Record<string, Record<string, CoursSauvegarde[]>>>((acc, c) => {
       const niveau = c.niveau || "Niveau non défini";
       const domaine = c.domaine || "Domaine non défini";
       acc[niveau] ??= {};
@@ -310,7 +322,7 @@ export default function BibliothequePage() {
       acc[niveau][domaine].push(c);
       return acc;
     }, {});
-  }, [cours]);
+  }, [coursVisibles]);
 
   const dossiersBibliotheque: Array<{
     id: DossierBibliotheque;
@@ -322,19 +334,19 @@ export default function BibliothequePage() {
       id: "preparations",
       titre: "Fiches de préparation",
       description: "Séances générées depuis Préparer, avec leurs progressions.",
-      compteur: fiches.length
+      compteur: filtrerParClasse(fiches).length
     },
     {
       id: "activites",
       titre: "Activités",
       description: "Fiches élèves et supports d'activité à distribuer en classe.",
-      compteur: activites.length
+      compteur: activitesVisibles.length
     },
     {
       id: "cours",
       titre: "Cours",
       description: "Présentations enseignant à diffuser pendant la séance.",
-      compteur: cours.length
+      compteur: coursVisibles.length
     }
   ];
 
@@ -651,6 +663,23 @@ export default function BibliothequePage() {
               Retrouvez les séquences et séances selon l'arborescence Cycle / Niveau / Domaine /
               Sous-domaine / Séquence.
             </p>
+            {classes.length > 0 && (
+              <label className="mt-4 grid max-w-xs gap-2">
+                <span className="text-sm font-semibold text-slate-800">Classe</span>
+                <select
+                  value={classeFiltreId}
+                  onChange={(event) => setClasseFiltreId(event.target.value)}
+                  className="rounded-md border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-100"
+                >
+                  <option value="">Toutes mes classes</option>
+                  {classes.map((classe) => (
+                    <option key={classe.id} value={classe.id}>
+                      {classe.nom}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            )}
           </div>
           <div className="flex flex-wrap gap-3">
             <a href="/" className="rounded-md border border-slate-300 bg-white px-4 py-3 text-sm font-semibold text-slate-900 shadow-sm transition hover:bg-slate-100">
@@ -703,7 +732,7 @@ export default function BibliothequePage() {
           })}
         </div>
 
-        {dossierActif === "preparations" && sequences.length === 0 && (
+        {dossierActif === "preparations" && sequencesVisibles.length === 0 && (
           <div className="rounded-lg border border-dashed border-slate-300 bg-white p-6 text-slate-700">
             <h2 className="text-lg font-semibold text-slate-950">Préparations</h2>
             <p className="mt-2 leading-7">
@@ -714,7 +743,7 @@ export default function BibliothequePage() {
 
         {dossierActif === "activites" && (
           <div className="grid gap-4">
-            {activites.length === 0 ? (
+            {activitesVisibles.length === 0 ? (
               <div className="rounded-lg border border-dashed border-slate-300 bg-white p-6 text-slate-700">
                 <h2 className="text-lg font-semibold text-slate-950">Activités</h2>
                 <p className="mt-2 leading-7">
@@ -838,7 +867,7 @@ export default function BibliothequePage() {
 
         {dossierActif === "cours" && (
           <div className="grid gap-4">
-            {cours.length === 0 ? (
+            {coursVisibles.length === 0 ? (
               <div className="rounded-lg border border-dashed border-slate-300 bg-white p-6 text-slate-700">
                 <h2 className="text-lg font-semibold text-slate-950">Cours</h2>
                 <p className="mt-2 leading-7">

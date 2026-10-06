@@ -108,6 +108,7 @@ export type CoursSauvegarde = {
   id: string;
   createdAt: string;
   preparedLessonId?: string;
+  classeId?: string;
   cycle: string;
   niveau: string;
   domaine: string;

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { lireObjetJsonIa } from "../../lib/ai-json";
+import { consigneMultiNiveaux } from "../../lib/multi-niveaux";
 import { callAlbert } from "../../lib/ai-provider";
 import { buildReferencesContext } from "../../lib/references";
 
@@ -47,6 +48,7 @@ type FicheActivite = {
 };
 
 type GenerateStudentActivityRequest = {
+  niveauxClasse?: string[];
   cycle?: string;
   niveau?: string;
   domaine?: string;
@@ -157,7 +159,7 @@ export async function POST(request: Request) {
     "lesson"
   );
   const systemPrompt = SYSTEM_PROMPT + referencesContext;
-  const prompt = buildPrompt(contexte);
+  const prompt = buildPrompt(contexte) + consigneMultiNiveaux(body.niveauxClasse);
 
   function parseFiche(texte: string) {
     const fiche = lireObjetJsonIa<FicheActivite>(texte);

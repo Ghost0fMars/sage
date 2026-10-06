@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import referentielBrut from "../../Référentiel_de_compétences.json";
 import { readUserData, writeUserData } from "../lib/user-storage";
+import { Classe, NIVEAUX_SCOLAIRES, lireClasses, niveauxEnseignes } from "../lib/classes";
 import FicheSeanceModal from "../components/FicheSeanceModal";
 import GeneratingLabel from "../components/GeneratingLabel";
 import { escapeHtml, ouvrirEtImprimer, printBaseStyles, printDocumentHeader } from "../lib/print-document";
@@ -98,6 +99,7 @@ type SeanceDetaillee = {
 
 type TuilePlanning = {
   id: string;
+  classeId?: string;
   preparedLessonId?: string;
   titreSequence: string;
   seanceLabel: string;
@@ -110,6 +112,7 @@ type TuilePlanning = {
 
 type SeancePreparee = {
   id: string;
+  classeId?: string;
   createdAt: string;
   cycle: string;
   niveau: string;
@@ -145,6 +148,7 @@ type FicheActiviteEleve = {
 
 type ActiviteEleveSauvegardee = {
   id: string;
+  classeId?: string;
   createdAt: string;
   preparedLessonId?: string;
   cycle: string;
@@ -160,6 +164,7 @@ type ActiviteEleveSauvegardee = {
 
 type SequencePreparee = {
   id: string;
+  classeId?: string;
   createdAt: string;
   cycle: string;
   niveau: string;
@@ -253,6 +258,21 @@ export default function PagePreparation() {
   const [seanceEnCours, setSeanceEnCours] = useState<number | null>(null);
   const [activiteEleveEnCours, setActiviteEleveEnCours] = useState(false);
   const [coursEnCours, setCoursEnCours] = useState(false);
+  const [classes, setClasses] = useState<Classe[]>([]);
+  const [classeId, setClasseId] = useState("");
+
+  useEffect(() => {
+    setClasses(lireClasses());
+  }, []);
+
+  const classeChoisie = classes.find((classe) => classe.id === classeId);
+  const mesNiveaux = useMemo(
+    () => classeChoisie?.niveaux ?? niveauxEnseignes(classes),
+    [classeChoisie, classes]
+  );
+  const contexteClasse = classeChoisie
+    ? { classeId: classeChoisie.id, niveauxClasse: classeChoisie.niveaux }
+    : {};
 
   const referentiel = useMemo<LigneReferentiel[]>(
     () =>
@@ -265,6 +285,17 @@ export default function PagePreparation() {
         competence: ligne["Compétence"].trim()
       })),
     []
+  );
+
+  // Masque les niveaux scolaires que l'enseignant n'a pas déclarés dans ses classes.
+  const referentielEnseigne = useMemo(
+    () =>
+      mesNiveaux.length === 0
+        ? referentiel
+        : referentiel.filter(
+            (ligne) => !NIVEAUX_SCOLAIRES.includes(ligne.niveau) || mesNiveaux.includes(ligne.niveau)
+          ),
+    [referentiel, mesNiveaux]
   );
 
   useEffect(() => {
@@ -290,24 +321,24 @@ export default function PagePreparation() {
   }, [seancePrepareeId]);
 
   const etapes: EtapeSelection[] = [
-    { id: "cycle", label: libelles.cycle, options: valeursUniques(referentiel, "cycle") },
+    { id: "cycle", label: libelles.cycle, options: valeursUniques(referentielEnseigne, "cycle") },
     {
       id: "niveau",
       label: libelles.niveau,
-      options: valeursUniques(filtrerReferentiel(referentiel, selection, "niveau"), "niveau"),
+      options: valeursUniques(filtrerReferentiel(referentielEnseigne, selection, "niveau"), "niveau"),
       disabled: !selection.cycle
     },
     {
       id: "domaine",
       label: libelles.domaine,
-      options: valeursUniques(filtrerReferentiel(referentiel, selection, "domaine"), "domaine"),
+      options: valeursUniques(filtrerReferentiel(referentielEnseigne, selection, "domaine"), "domaine"),
       disabled: !selection.niveau
     },
     {
       id: "sousDomaine",
       label: libelles.sousDomaine,
       options: valeursUniques(
-        filtrerReferentiel(referentiel, selection, "sousDomaine"),
+        filtrerReferentiel(referentielEnseigne, selection, "sousDomaine"),
         "sousDomaine"
       ),
       disabled: !selection.domaine
@@ -315,14 +346,14 @@ export default function PagePreparation() {
     {
       id: "item",
       label: libelles.item,
-      options: valeursUniques(filtrerReferentiel(referentiel, selection, "item"), "item"),
+      options: valeursUniques(filtrerReferentiel(referentielEnseigne, selection, "item"), "item"),
       disabled: !selection.sousDomaine
     },
     {
       id: "competence",
       label: libelles.competence,
       options: valeursUniques(
-        filtrerReferentiel(referentiel, selection, "competence"),
+        filtrerReferentiel(referentielEnseigne, selection, "competence"),
         "competence"
       ),
       disabled: !selection.item
@@ -364,6 +395,7 @@ export default function PagePreparation() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          ...contexteClasse,
           promptLibre: promptLibre.trim()
         })
       });
@@ -420,6 +452,7 @@ export default function PagePreparation() {
         {
           id: sequenceId,
           createdAt: new Date().toISOString(),
+          classeId: classeChoisie?.id,
           cycle: ctx.cycle,
           niveau: ctx.niveau,
           domaine: ctx.domaine,
@@ -500,6 +533,7 @@ export default function PagePreparation() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          ...contexteClasse,
           cycle: selection.cycle,
           niveau: selection.niveau,
           domaine: selection.domaine,
@@ -530,6 +564,7 @@ export default function PagePreparation() {
         {
           id: sequenceId,
           createdAt: new Date().toISOString(),
+          classeId: classeChoisie?.id,
           cycle: selection.cycle,
           niveau: selection.niveau,
           domaine: selection.domaine,
@@ -566,6 +601,7 @@ export default function PagePreparation() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          ...contexteClasse,
           cycle: selection.cycle,
           niveau: selection.niveau,
           domaine: selection.domaine,
@@ -592,6 +628,7 @@ export default function PagePreparation() {
         const seancePreparee: SeancePreparee = {
           id,
           createdAt: new Date().toISOString(),
+          classeId: classeChoisie?.id,
           cycle: selection.cycle,
           niveau: selection.niveau,
           domaine: selection.domaine,
@@ -745,7 +782,8 @@ export default function PagePreparation() {
       seanceLabel: `${seanceSource.numero}/${sequence.seances.length}`,
       domaine: selection.domaine,
       dureeMinutes: seanceDetaillee.duree_minutes,
-      lesson: seanceDetaillee
+      lesson: seanceDetaillee,
+      classeId: classeChoisie?.id
     };
 
     const tuilesExistantes = readUserData<TuilePlanning[]>(
@@ -760,7 +798,7 @@ export default function PagePreparation() {
 
   async function genererActiviteEleve(lesson: SeanceDetaillee) {
     if (!sequence || !seanceSource) {
-      setErreur("PrÃ©parez d'abord une sÃ©ance.");
+      setErreur("Préparez d'abord une séance.");
       return;
     }
 
@@ -773,6 +811,7 @@ export default function PagePreparation() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          ...contexteClasse,
           cycle: selection.cycle,
           niveau: selection.niveau || lesson.niveau,
           domaine: selection.domaine,
@@ -791,7 +830,7 @@ export default function PagePreparation() {
       };
 
       if (!response.ok || !data.activity) {
-        throw new Error(data.error ?? "Impossible de gÃ©nÃ©rer la fiche Ã©lÃ¨ve.");
+        throw new Error(data.error ?? "Impossible de générer la fiche élève.");
       }
 
       const activitesExistantes = readUserData<ActiviteEleveSauvegardee[]>(
@@ -804,6 +843,7 @@ export default function PagePreparation() {
         id: crypto.randomUUID(),
         createdAt: new Date().toISOString(),
         preparedLessonId: seancePrepareeId || undefined,
+        classeId: classeChoisie?.id,
         cycle: selection.cycle,
         niveau: selection.niveau || lesson.niveau,
         domaine: selection.domaine,
@@ -816,7 +856,7 @@ export default function PagePreparation() {
       };
 
       writeUserData(STUDENT_ACTIVITIES_STORAGE_KEY, [...activitesExistantes, prochaineActivite]);
-      setMessagePlanning(`La fiche Ã©lÃ¨ve "${data.activity.titre}" a Ã©tÃ© rangÃ©e dans ActivitÃ©s.`);
+      setMessagePlanning(`La fiche élève "${data.activity.titre}" a été rangée dans Activités.`);
     } catch (error) {
       setErreur(error instanceof Error ? error.message : "Une erreur inconnue est survenue.");
     } finally {
@@ -839,6 +879,7 @@ export default function PagePreparation() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          ...contexteClasse,
           cycle: selection.cycle,
           niveau: selection.niveau || lesson.niveau,
           domaine: selection.domaine,
@@ -870,6 +911,7 @@ export default function PagePreparation() {
         id: crypto.randomUUID(),
         createdAt: new Date().toISOString(),
         preparedLessonId: seancePrepareeId || undefined,
+        classeId: classeChoisie?.id,
         cycle: selection.cycle,
         niveau: selection.niveau || lesson.niveau,
         domaine: selection.domaine,
@@ -930,6 +972,26 @@ export default function PagePreparation() {
           >
             Par prompt libre
           </button>
+          {classes.length > 0 && (
+            <label className="ml-auto flex items-center gap-2 text-sm font-semibold text-slate-800">
+              Classe
+              <select
+                value={classeId}
+                onChange={(e) => {
+                  setClasseId(e.target.value);
+                  changerSelection("cycle", "");
+                }}
+                className="rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-normal text-slate-950 shadow-sm outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-100"
+              >
+                <option value="">Toutes mes classes</option>
+                {classes.map((classe) => (
+                  <option key={classe.id} value={classe.id}>
+                    {classe.nom} ({classe.niveaux.join(", ") || "aucun niveau"})
+                  </option>
+                ))}
+              </select>
+            </label>
+          )}
         </div>
 
         {modePrompt ? (

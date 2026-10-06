@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { callAlbert } from "../../lib/ai-provider";
 import { lireObjetJsonIa } from "../../lib/ai-json";
+import { consigneMultiNiveaux } from "../../lib/multi-niveaux";
 import { buildReferencesContext } from "../../lib/references";
 
 type BeatInput = {
@@ -23,6 +24,7 @@ type SeanceSequence = {
 };
 
 type GenerateLessonRequest = {
+  niveauxClasse?: string[];
   cycle?: string;
   niveau?: string;
   domaine?: string;
@@ -198,7 +200,7 @@ export async function POST(request: Request) {
   }
 
   const systemPrompt = buildLessonSystemPrompt(contexte.cycle, contexte.niveau, contexte.domaine);
-  const prompt = buildPrompt(contexte);
+  const prompt = buildPrompt(contexte) + consigneMultiNiveaux(body.niveauxClasse);
 
   function parseSeance(texte: string) {
     const seance = lireObjetJsonIa<SeanceDetaillee>(texte);

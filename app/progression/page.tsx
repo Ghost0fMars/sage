@@ -2,11 +2,13 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { readUserData, writeUserData } from "../lib/user-storage";
+import { Classe, lireClasses } from "../lib/classes";
 
 type Eleve = {
   id: string;
   nom: string;
   prenom: string;
+  classeId?: string;
 };
 
 type SequencePreparee = {
@@ -92,10 +94,12 @@ export default function ProgressionPage() {
   const [sequences, setSequences] = useState<SequencePreparee[]>([]);
   const [evaluations, setEvaluations] = useState<Evaluation[]>([]);
   const [evaluationSelectionneeId, setEvaluationSelectionneeId] = useState("");
+  const [classes, setClasses] = useState<Classe[]>([]);
   const [nouvelleEvaluation, setNouvelleEvaluation] = useState({
     titre: "",
     date: "",
     sequenceId: "",
+    classeId: "",
     domaine: "",
     competence: "",
     objectif: ""
@@ -115,6 +119,7 @@ export default function ProgressionPage() {
     );
 
     setEleves(elevesStockes);
+    setClasses(lireClasses());
     setSequences(sequencesStockees);
     setEvaluations(evaluationsStockees);
     setEvaluationSelectionneeId(evaluationsStockees[0]?.id ?? "");
@@ -166,7 +171,11 @@ export default function ProgressionPage() {
       domaine: nouvelleEvaluation.domaine.trim(),
       competence: nouvelleEvaluation.competence.trim(),
       objectif: nouvelleEvaluation.objectif.trim(),
-      resultats: creerResultatsVides(eleves)
+      resultats: creerResultatsVides(
+        nouvelleEvaluation.classeId
+          ? eleves.filter((eleve) => eleve.classeId === nouvelleEvaluation.classeId)
+          : eleves
+      )
     };
 
     const prochainesEvaluations = [evaluation, ...evaluations];
@@ -176,6 +185,7 @@ export default function ProgressionPage() {
       titre: "",
       date: "",
       sequenceId: "",
+      classeId: nouvelleEvaluation.classeId,
       domaine: "",
       competence: "",
       objectif: ""
@@ -266,6 +276,29 @@ export default function ProgressionPage() {
                   ))}
                 </select>
               </label>
+
+              {classes.length > 0 && (
+                <label className="grid gap-2">
+                  <span className="text-sm font-semibold text-slate-800">Classe évaluée</span>
+                  <select
+                    value={nouvelleEvaluation.classeId}
+                    onChange={(event) =>
+                      setNouvelleEvaluation((actuelle) => ({
+                        ...actuelle,
+                        classeId: event.target.value
+                      }))
+                    }
+                    className="w-full min-w-0 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-100"
+                  >
+                    <option value="">Tous les élèves</option>
+                    {classes.map((classe) => (
+                      <option key={classe.id} value={classe.id}>
+                        {classe.nom}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              )}
 
               <label className="grid gap-2">
                 <span className="text-sm font-semibold text-slate-800">Titre</span>

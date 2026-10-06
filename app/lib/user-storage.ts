@@ -25,7 +25,8 @@ export const SYNCED_DATA_KEYS = [
   "sage-evaluations",
   "sage-student-notes",
   "sage-student-photos",
-  "sage-reglement-interieur"
+  "sage-reglement-interieur",
+  "sage-classes"
 ];
 
 function slugify(value: string) {

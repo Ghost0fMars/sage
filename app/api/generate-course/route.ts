@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { lireObjetJsonIa } from "../../lib/ai-json";
+import { consigneMultiNiveaux } from "../../lib/multi-niveaux";
 import { callAlbert } from "../../lib/ai-provider";
 import { buildReferencesContext } from "../../lib/references";
 import { normaliserEtValiderCours, type CoursPresentation } from "../../lib/course-types";
@@ -29,6 +30,7 @@ type SeanceDetaillee = {
 };
 
 type GenerateCourseRequest = {
+  niveauxClasse?: string[];
   cycle?: string;
   niveau?: string;
   domaine?: string;
@@ -160,7 +162,7 @@ export async function POST(request: Request) {
     "lesson"
   );
   const systemPrompt = SYSTEM_PROMPT + referencesContext;
-  const prompt = buildPrompt(contexte);
+  const prompt = buildPrompt(contexte) + consigneMultiNiveaux(contexte.niveauxClasse);
 
   function parseCours(texte: string): CoursPresentation {
     const brut = lireObjetJsonIa<Record<string, unknown>>(texte);

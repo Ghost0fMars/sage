@@ -2,11 +2,14 @@
 
 import { ChangeEvent, useEffect, useMemo, useState } from "react";
 import { readUserData, writeUserData } from "../lib/user-storage";
+import { Classe, lireClasses } from "../lib/classes";
 
 type Eleve = {
   id: string;
   nom: string;
   prenom: string;
+  classeId?: string;
+  niveau?: string;
   naissance: string;
   groupe: string;
   genre: string;
@@ -113,11 +116,13 @@ const valeursNiveaux = {
   Dépassé: 100
 };
 
-function creerEleve(numero: number): Eleve {
+function creerEleve(numero: number, classe?: Classe): Eleve {
   return {
     id: crypto.randomUUID(),
     nom: `Nom${numero}`,
     prenom: `Prénom${numero}`,
+    classeId: classe?.id ?? "",
+    niveau: classe?.niveaux.length === 1 ? classe.niveaux[0] : "",
     naissance: "",
     groupe: "",
     genre: "",
@@ -159,6 +164,8 @@ export default function ElevesPage() {
   const [eleveOuvertId, setEleveOuvertId] = useState("");
   const [nouvelleNote, setNouvelleNote] = useState("");
   const [filtre, setFiltre] = useState("");
+  const [classes, setClasses] = useState<Classe[]>([]);
+  const [classeFiltreId, setClasseFiltreId] = useState("");
   const [donneesChargees, setDonneesChargees] = useState(false);
   const [modificationsNonSauvegardees, setModificationsNonSauvegardees] = useState(false);
   const [messageSauvegarde, setMessageSauvegarde] = useState("");
@@ -176,19 +183,22 @@ export default function ElevesPage() {
     setEvaluations(readUserData<Evaluation[]>(EVALUATIONS_STORAGE_KEY, [], EVALUATIONS_STORAGE_KEY));
     setNotesEleves(readUserData<NoteEleve[]>(STUDENT_NOTES_STORAGE_KEY, [], STUDENT_NOTES_STORAGE_KEY));
     setPhotosEleves(readUserData<PhotoEleve[]>(STUDENT_PHOTOS_STORAGE_KEY, [], STUDENT_PHOTOS_STORAGE_KEY));
+    setClasses(lireClasses());
     setDonneesChargees(true);
   }, []);
 
   const elevesFiltres = useMemo(() => {
     const recherche = filtre.trim().toLowerCase();
-    if (!recherche) {
-      return eleves;
-    }
-
-    return eleves.filter((eleve) =>
-      `${eleve.nom} ${eleve.prenom} ${eleve.groupe} ${eleve.notes}`.toLowerCase().includes(recherche)
+    return eleves.filter(
+      (eleve) =>
+        (!classeFiltreId || eleve.classeId === classeFiltreId) &&
+        `${eleve.nom} ${eleve.prenom} ${eleve.groupe} ${eleve.niveau ?? ""} ${eleve.notes}`
+          .toLowerCase()
+          .includes(recherche)
     );
-  }, [eleves, filtre]);
+  }, [eleves, filtre, classeFiltreId]);
+
+  const classeFiltree = classes.find((classe) => classe.id === classeFiltreId);
 
   function mettreAJourEleve(id: string, miseAJour: Partial<Eleve>) {
     setEleves((elevesActuels) =>
@@ -199,7 +209,7 @@ export default function ElevesPage() {
   }
 
   function ajouterEleve() {
-    setEleves((elevesActuels) => [...elevesActuels, creerEleve(elevesActuels.length + 1)]);
+    setEleves((elevesActuels) => [...elevesActuels, creerEleve(elevesActuels.length + 1, classeFiltree)]);
     setModificationsNonSauvegardees(true);
     setMessageSauvegarde("");
   }
@@ -357,8 +367,25 @@ export default function ElevesPage() {
           </div>
         )}
 
-        <div className="mb-4 rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
-          <label className="grid max-w-md gap-2">
+        <div className="mb-4 flex flex-wrap gap-4 rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
+          {classes.length > 0 && (
+            <label className="grid gap-2">
+              <span className="text-sm font-semibold text-slate-800">Classe</span>
+              <select
+                value={classeFiltreId}
+                onChange={(event) => setClasseFiltreId(event.target.value)}
+                className="rounded-md border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-100"
+              >
+                <option value="">Toutes les classes</option>
+                {classes.map((classe) => (
+                  <option key={classe.id} value={classe.id}>
+                    {classe.nom}
+                  </option>
+                ))}
+              </select>
+            </label>
+          )}
+          <label className="grid max-w-md flex-1 gap-2">
             <span className="text-sm font-semibold text-slate-800">Rechercher</span>
             <input
               value={filtre}
@@ -377,6 +404,12 @@ export default function ElevesPage() {
                   Nom
                 </th>
                 <th className="w-28 border border-white px-2 py-1 text-left text-xs leading-tight">Prénom</th>
+                {classes.length > 0 && (
+                  <>
+                    <th className="w-24 border border-white px-2 py-1 text-left text-xs leading-tight">Classe</th>
+                    <th className="w-20 border border-white px-2 py-1 text-left text-xs leading-tight">Niveau</th>
+                  </>
+                )}
                 <th className="w-28 border border-white px-2 py-1 text-left text-xs leading-tight">Naissance</th>
                 <th className="w-16 border border-white px-2 py-1 text-left text-xs leading-tight">Groupe</th>
                 <th className="w-14 border border-white px-2 py-1 text-left text-xs leading-tight">Genre</th>
@@ -427,6 +460,44 @@ export default function ElevesPage() {
                       className="w-full rounded border border-transparent bg-transparent px-1 py-1 outline-none focus:border-teal-500 focus:bg-white"
                     />
                   </td>
+                  {classes.length > 0 && (
+                    <>
+                      <td className="border border-white px-2 py-1">
+                        <select
+                          value={eleve.classeId ?? ""}
+                          onChange={(event) => {
+                            const classe = classes.find((c) => c.id === event.target.value);
+                            mettreAJourEleve(eleve.id, {
+                              classeId: event.target.value,
+                              niveau: classe?.niveaux.length === 1 ? classe.niveaux[0] : ""
+                            });
+                          }}
+                          className="w-full rounded border border-transparent bg-transparent px-1 py-1 outline-none focus:border-teal-500 focus:bg-white"
+                        >
+                          <option value="">-</option>
+                          {classes.map((classe) => (
+                            <option key={classe.id} value={classe.id}>
+                              {classe.nom}
+                            </option>
+                          ))}
+                        </select>
+                      </td>
+                      <td className="border border-white px-2 py-1">
+                        <select
+                          value={eleve.niveau ?? ""}
+                          onChange={(event) => changerTexte(event, eleve.id, "niveau")}
+                          className="w-full rounded border border-transparent bg-transparent px-1 py-1 outline-none focus:border-teal-500 focus:bg-white"
+                        >
+                          <option value="">-</option>
+                          {(classes.find((c) => c.id === eleve.classeId)?.niveaux ?? []).map((niveau) => (
+                            <option key={niveau} value={niveau}>
+                              {niveau}
+                            </option>
+                          ))}
+                        </select>
+                      </td>
+                    </>
+                  )}
                   <td className="border border-white px-2 py-1">
                     <input
                       type="date"

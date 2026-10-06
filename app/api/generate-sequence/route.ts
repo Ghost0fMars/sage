@@ -1,9 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { callAlbert } from "../../lib/ai-provider";
 import { lireObjetJsonIa } from "../../lib/ai-json";
+import { consigneMultiNiveaux } from "../../lib/multi-niveaux";
 import { buildReferencesContext } from "../../lib/references";
 
 type GenerateSequenceRequest = {
+  niveauxClasse?: string[];
   typeSequence?: "introduction" | "consolidation" | "evaluation" | "projet";
   cycle?: string;
   niveau?: string;
@@ -217,7 +219,7 @@ export async function POST(request: NextRequest) {
 
   const regime = determineRegime(typeSequence ?? "introduction");
   const systemPrompt = buildSystemPrompt(regime, contexte.cycle, contexte.niveau, contexte.domaine);
-  const prompt = buildPrompt(contexte, regime);
+  const prompt = buildPrompt(contexte, regime) + consigneMultiNiveaux(body.niveauxClasse);
 
   function parseSequence(texte: string) {
     const sequence = lireObjetJsonIa<Sequence>(texte);

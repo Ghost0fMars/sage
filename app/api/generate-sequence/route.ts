@@ -104,7 +104,7 @@ function buildSystemPrompt(
 
   const rd = regimeDescriptions[regime];
   const cg =
-    (cycle ? cycleGuidance[cycle] : null) ??
+    (cycle ? cycleGuidance[cycle.slice(0, 7)] : null) ??
     "Adapter le niveau de difficulté et les modalités au cycle concerné.";
 
   const referencesContext =

@@ -154,8 +154,11 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   const sidebar = (
     <>
       <div className="px-2">
-        <p className="font-bold text-white">Sage</p>
-        <p className="text-xs text-white/50">Portail enseignant</p>
+        <p className="flex items-center gap-2 text-xl font-bold text-slate-950">
+          <span aria-hidden="true" className="h-5 w-1.5 rounded-full bg-menthe" />
+          Sage
+        </p>
+        <p className="mt-0.5 text-xs text-slate-500">Portail enseignant</p>
       </div>
 
       <nav className="mt-6 grid gap-1">
@@ -166,10 +169,11 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
             <a
               key={item.href}
               href={item.href}
-              className={`flex items-center gap-3 rounded-lg px-3 py-3 text-sm font-semibold transition ${
+              aria-current={active ? "page" : undefined}
+              className={`flex min-h-11 items-center gap-3 rounded-md px-3 py-3 text-sm font-semibold transition ${
                 active
-                  ? "bg-teal-600 text-white shadow-sm"
-                  : "text-white/60 hover:bg-white/10 hover:text-white"
+                  ? "rounded-l-none bg-bleu-france-mist text-bleu-france shadow-[inset_3px_0_0_#000091]"
+                  : "text-slate-700 hover:bg-slate-50 hover:text-slate-950"
               }`}
             >
               <span className="flex w-5 items-center justify-center">{item.icon}</span>
@@ -181,10 +185,10 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
         {supabaseConfigured && !cloudEmail && (
           <a
             href="/auth"
-            className={`flex items-center gap-3 rounded-lg px-3 py-3 text-sm font-semibold transition ${
+            className={`flex min-h-11 items-center gap-3 rounded-md px-3 py-3 text-sm font-semibold transition ${
               pathname === "/auth"
-                ? "bg-teal-600 text-white shadow-sm"
-                : "text-white/60 hover:bg-white/10 hover:text-white"
+                ? "rounded-l-none bg-bleu-france-mist text-bleu-france shadow-[inset_3px_0_0_#000091]"
+                : "text-slate-700 hover:bg-slate-50 hover:text-slate-950"
             }`}
           >
             <span className="flex w-5 items-center justify-center">{icons.login}</span>
@@ -194,33 +198,33 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
       </nav>
 
       <div className="mt-auto grid gap-4 pt-8">
-        <div className="grid gap-2 border-t border-white/10 pt-5 text-xs font-semibold text-white/55">
+        <div className="grid gap-2 border-t border-slate-200 pt-5 text-xs font-semibold text-slate-500">
           <a
             href="https://alacle.org"
             target="_blank"
             rel="noreferrer"
-            className="rounded-md px-3 py-2 transition hover:bg-white/10 hover:text-white"
+            className="rounded-md px-3 py-2 transition hover:bg-slate-50 hover:text-slate-950"
           >
             alacle.org
           </a>
           <a
             href="/politique-confidentialite"
-            className="rounded-md px-3 py-2 transition hover:bg-white/10 hover:text-white"
+            className="rounded-md px-3 py-2 transition hover:bg-slate-50 hover:text-slate-950"
           >
             Politique de confidentialité
           </a>
         </div>
 
-        <div className="w-full max-w-full rounded-xl bg-white/5 p-3">
+        <div className="w-full max-w-full rounded-md bg-slate-50 p-3">
           <div className="flex min-w-0 items-center gap-3">
-            <div className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-teal-600 font-bold text-white">
+            <div className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-menthe-mist font-bold text-menthe-profond">
               {(profile.firstName || profile.lastName || "E")[0].toUpperCase()}
             </div>
             <div className="min-w-0 flex-1 overflow-hidden">
-              <p className="whitespace-normal break-words text-sm font-semibold leading-5 text-white [overflow-wrap:anywhere]">
+              <p className="whitespace-normal break-words text-sm font-semibold leading-5 text-slate-950 [overflow-wrap:anywhere]">
                 {[profile.firstName, profile.lastName].filter(Boolean).join(" ") || "Enseignant"}
               </p>
-              <p className="mt-0.5 whitespace-normal break-words text-xs leading-4 text-white/50 [overflow-wrap:anywhere]" title={cloudEmail ?? undefined}>
+              <p className="mt-0.5 whitespace-normal break-words text-xs leading-4 text-slate-500 [overflow-wrap:anywhere]" title={cloudEmail ?? undefined}>
                 {profile.school || cloudEmail || "Données locales"}
               </p>
             </div>
@@ -229,7 +233,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                 type="button"
                 onClick={deconnecter}
                 title="Se déconnecter"
-                className="shrink-0 grid h-8 w-8 place-items-center rounded-lg text-white/50 transition hover:bg-white/10 hover:text-white"
+                className="shrink-0 grid h-8 w-8 place-items-center rounded-md text-slate-500 transition hover:bg-slate-100 hover:text-slate-950"
               >
                 {icons.logout}
               </button>
@@ -251,7 +255,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
           type="button"
           onClick={() => setMobileMenuOpen(true)}
           aria-label="Ouvrir le menu"
-          className="grid h-11 w-11 place-items-center rounded-lg bg-slate-950 text-white shadow-sm transition hover:bg-teal-700"
+          className="grid h-11 w-11 place-items-center rounded-md border border-slate-200 bg-white text-slate-950 shadow-sm transition hover:bg-slate-50"
         >
           <svg
             width="22"
@@ -277,12 +281,12 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
             className="absolute inset-0 bg-slate-950/60"
             onClick={() => setMobileMenuOpen(false)}
           />
-          <aside className="relative flex h-full w-[min(82vw,320px)] flex-col bg-slate-950 px-4 py-5 shadow-2xl">
+          <aside className="relative flex h-full w-[min(82vw,320px)] flex-col bg-white px-4 py-5 shadow-2xl">
             <button
               type="button"
               onClick={() => setMobileMenuOpen(false)}
               aria-label="Fermer le menu"
-              className="absolute right-4 top-5 z-10 grid h-10 w-10 place-items-center rounded-lg text-white/70 transition hover:bg-white/10 hover:text-white"
+              className="absolute right-4 top-5 z-10 grid h-10 w-10 place-items-center rounded-md text-slate-500 transition hover:bg-slate-100 hover:text-slate-950"
             >
               <svg
                 width="22"
@@ -302,7 +306,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
         </div>
       )}
 
-      <aside className="hidden h-screen min-h-screen flex-col overflow-y-auto bg-slate-950 px-4 py-5 lg:sticky lg:top-0 lg:flex">
+      <aside className="hidden h-screen min-h-screen flex-col overflow-y-auto border-r border-slate-200 bg-white px-4 py-5 lg:sticky lg:top-0 lg:flex">
         {sidebar}
       </aside>
 

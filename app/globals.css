@@ -1,33 +1,73 @@
-﻿@tailwind base;
+@tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+/* Charte de l'État (DSFR), cf. DESIGN.md « La salle des maîtres ». Couleurs Tailwind
+   réaffectées dans tailwind.config.ts ; ici : police, jetons, surfaces du navigateur. */
+@font-face { font-family: Marianne; src: url(/carte/polices/Marianne-Regular.woff2) format("woff2"); font-weight: 400; font-display: swap; }
+@font-face { font-family: Marianne; src: url(/carte/polices/Marianne-Medium.woff2) format("woff2"); font-weight: 500; font-display: swap; }
+@font-face { font-family: Marianne; src: url(/carte/polices/Marianne-Bold.woff2) format("woff2"); font-weight: 700; font-display: swap; }
+
 :root {
   color-scheme: light;
-  --sage-ink: #032026;
-  --sage-deep-green: #14554d;
-  --sage-primary: #006b60;
-  --sage-primary-hover: #004f49;
-  --sage-orange: #ff8500;
-  --sage-gold: #ffb000;
-  --sage-honey: #ffc145;
-  --sage-paper: #f8faf5;
-  --sage-soft: #eef5ef;
-  --sage-border: #c9d8d1;
-  --sage-muted: #587167;
-  --sage-white: #ffffff;
-  --sage-warning-soft: #fff4d6;
+  --bleu-france: #000091;
+  --bleu-france-mist: #f5f5fe;
+  --encre-titre: #161616;
+  --encre-texte: #3a3a3a;
+  --gris-trait: #dddddd;
+  --gris-contraste: #eeeeee;
+  --gris-fond: #f6f6f6;
+  --focus: #0a76f6;
 }
 
-body {
-  margin: 0;
-  background: var(--sage-paper);
-  color: var(--sage-ink);
+@layer base {
+  body {
+    margin: 0;
+    background: var(--gris-fond);
+    color: var(--encre-texte);
+    font-family: Marianne, arial, sans-serif;
+    caret-color: var(--bleu-france);
+    scrollbar-color: #cecece transparent;
+  }
+
+  button,
+  select {
+    font: inherit;
+  }
+
+  ::selection {
+    background: var(--bleu-france);
+    color: #fff;
+  }
+
+  /* Focus clavier DSFR sur tout ce qui n'a pas son propre anneau */
+  :focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 2px;
+  }
+
+  table {
+    font-variant-numeric: tabular-nums;
+  }
 }
 
-button,
-select {
-  font: inherit;
+/* Champs de formulaire standard (classe border-slate-300) : signature DSFR, fond gris et
+   trait inférieur. Hors couche, pour primer sur la bordure et l'arrondi utilitaires. */
+:is(input, select, textarea)[class~="border-slate-300"] {
+  background-color: var(--gris-contraste);
+  border-color: transparent;
+  border-bottom: 2px solid var(--encre-titre);
+  border-radius: 6px 6px 0 0;
+  color: var(--encre-titre);
+}
+
+:is(input, select, textarea)[class~="border-slate-300"]:focus {
+  border-bottom-color: var(--bleu-france);
+}
+
+:is(input, select, textarea)[class~="border-slate-300"]:disabled {
+  border-bottom-color: #929292;
+  color: #929292;
 }
 
 .line-clamp-2 {
@@ -35,162 +75,6 @@ select {
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
-}
-
-/* Theme Sage : vert principal, jaune et orange pour les contrastes utiles. */
-.bg-slate-50,
-.bg-slate-100,
-.bg-blue-50 {
-  background-color: var(--sage-paper) !important;
-}
-
-.bg-white {
-  background-color: var(--sage-white) !important;
-}
-
-.bg-slate-950,
-.bg-slate-900 {
-  background-color: var(--sage-ink) !important;
-}
-
-.bg-teal-700,
-.bg-teal-600 {
-  background-color: var(--sage-primary) !important;
-  color: var(--sage-white) !important;
-}
-
-.hover\:bg-teal-800:hover,
-.hover\:bg-teal-700:hover {
-  background-color: var(--sage-primary-hover) !important;
-  color: var(--sage-white) !important;
-}
-
-.bg-teal-50,
-.bg-teal-100,
-.bg-emerald-50,
-.bg-emerald-100 {
-  background-color: var(--sage-soft) !important;
-  color: var(--sage-ink) !important;
-}
-
-.bg-amber-50,
-.bg-amber-100,
-.bg-yellow-50,
-.bg-yellow-100 {
-  background-color: var(--sage-warning-soft) !important;
-  color: #5f3400 !important;
-}
-
-.bg-orange-500,
-.bg-orange-600,
-.bg-amber-500,
-.bg-yellow-500 {
-  background-color: var(--sage-orange) !important;
-  color: #1f1300 !important;
-}
-
-.hover\:bg-orange-600:hover,
-.hover\:bg-amber-600:hover,
-.hover\:bg-yellow-600:hover {
-  background-color: #e87400 !important;
-  color: #1f1300 !important;
-}
-
-.text-teal-700,
-.text-teal-800,
-.text-teal-900,
-.text-teal-950 {
-  color: var(--sage-deep-green) !important;
-}
-
-.text-amber-700,
-.text-amber-800,
-.text-amber-900,
-.text-amber-950,
-.text-orange-700,
-.text-orange-800,
-.text-orange-900 {
-  color: #8a4b00 !important;
-}
-
-.text-slate-950,
-.text-slate-900,
-.text-slate-800 {
-  color: var(--sage-ink) !important;
-}
-
-.text-slate-700,
-.text-slate-600,
-.text-slate-500 {
-  color: var(--sage-muted) !important;
-}
-
-.bg-teal-700.text-white,
-.bg-teal-600.text-white,
-.bg-teal-700 .text-white,
-.bg-teal-600 .text-white {
-  color: var(--sage-white) !important;
-}
-
-.border-slate-200,
-.border-slate-300,
-.border-teal-200,
-.border-blue-100,
-.border-white {
-  border-color: var(--sage-border) !important;
-}
-
-.ring-teal-100,
-.focus\:ring-teal-100:focus,
-.focus\:ring-teal-300:focus {
-  --tw-ring-color: var(--sage-honey) !important;
-}
-
-.focus\:border-teal-600:focus {
-  border-color: var(--sage-gold) !important;
-}
-
-.accent-teal-700 {
-  accent-color: var(--sage-primary) !important;
-}
-
-.bg-\[\#f0fdfa\],
-.bg-\[\#ccfbf1\],
-.bg-\[\#acdbc5\] {
-  background-color: #e8f4ed !important;
-}
-
-.bg-\[\#f5f7f2\],
-.bg-\[\#f8faf7\] {
-  background-color: var(--sage-paper) !important;
-}
-
-.bg-\[\#1e3a2e\],
-.bg-\[\#17382d\] {
-  background-color: var(--sage-ink) !important;
-}
-
-.bg-\[\#f4b400\] {
-  background-color: var(--sage-gold) !important;
-}
-
-.hover\:bg-\[\#e2a800\]:hover {
-  background-color: #ff9a00 !important;
-}
-
-.text-\[\#17382d\],
-.text-\[\#29483d\] {
-  color: var(--sage-ink) !important;
-}
-
-.text-\[\#3f7f62\],
-.text-\[\#1e3a2e\] {
-  color: var(--sage-primary) !important;
-}
-
-.border-\[\#c7d8ce\],
-.border-\[\#d6e2da\] {
-  border-color: var(--sage-border) !important;
 }
 
 @media print {

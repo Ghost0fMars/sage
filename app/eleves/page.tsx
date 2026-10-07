@@ -339,7 +339,7 @@ export default function ElevesPage() {
               type="button"
               onClick={sauvegarderEleves}
               disabled={!donneesChargees}
-              className="rounded-md bg-slate-900 px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:bg-slate-400"
+              className="rounded-md bg-teal-700 px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-teal-800 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400 disabled:shadow-none"
             >
               Sauvegarder
             </button>
@@ -374,7 +374,7 @@ export default function ElevesPage() {
               <select
                 value={classeFiltreId}
                 onChange={(event) => setClasseFiltreId(event.target.value)}
-                className="rounded-md border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-100"
+                className="rounded-md border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-teal-600 focus:ring-2 focus:ring-focus"
               >
                 <option value="">Toutes les classes</option>
                 {classes.map((classe) => (
@@ -391,7 +391,7 @@ export default function ElevesPage() {
               value={filtre}
               onChange={(event) => setFiltre(event.target.value)}
               placeholder="Nom, prénom, groupe, note..."
-              className="rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-100"
+              className="rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:border-teal-600 focus:ring-2 focus:ring-focus"
             />
           </label>
         </div>
@@ -399,8 +399,8 @@ export default function ElevesPage() {
         <div className="overflow-x-auto rounded-lg border border-slate-200 bg-white shadow-sm">
           <table className="min-w-[1440px] w-full table-fixed border-collapse text-xs">
             <thead>
-              <tr className="bg-[#f0fdfa] text-slate-950">
-                <th className="w-36 border border-white bg-[#f0fdfa] px-2 py-1 text-left text-xs leading-tight">
+              <tr className="bg-slate-100 text-slate-950">
+                <th className="w-36 border border-white bg-slate-100 px-2 py-1 text-left text-xs leading-tight">
                   Nom
                 </th>
                 <th className="w-28 border border-white px-2 py-1 text-left text-xs leading-tight">Prénom</th>
@@ -693,7 +693,7 @@ export default function ElevesPage() {
                           const x = 150 + Math.cos(angle) * 130;
                           const y = 150 + Math.sin(angle) * 130;
                           return (
-                            <text key={item.domaine} x={x} y={y} textAnchor="middle" className="fill-slate-700 text-[10px]">
+                            <text key={item.domaine} x={x} y={y} textAnchor="middle" className="fill-slate-700 text-xs">
                               {item.domaine.slice(0, 18)}
                             </text>
                           );
@@ -731,7 +731,7 @@ export default function ElevesPage() {
                         value={nouvelleNote}
                         onChange={(event) => setNouvelleNote(event.target.value)}
                         placeholder="Incident, observation, échange avec la famille..."
-                        className="min-h-24 resize-y rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-100"
+                        className="min-h-24 resize-y rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:border-teal-600 focus:ring-2 focus:ring-focus"
                       />
                       <button
                         type="button"

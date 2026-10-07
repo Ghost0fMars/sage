@@ -157,7 +157,7 @@ export default function AuthPage() {
               <input
                 value={name}
                 onChange={(event) => setName(event.target.value)}
-                className="rounded-md border border-slate-300 px-3 py-3 text-sm outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-100"
+                className="rounded-md border border-slate-300 px-3 py-3 text-sm outline-none focus:border-teal-600 focus:ring-2 focus:ring-focus"
                 placeholder="Prénom ou nom d'enseignant"
               />
             </label>
@@ -170,7 +170,7 @@ export default function AuthPage() {
               value={email}
               onChange={(event) => setEmail(event.target.value)}
               required
-              className="rounded-md border border-slate-300 px-3 py-3 text-sm outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-100"
+              className="rounded-md border border-slate-300 px-3 py-3 text-sm outline-none focus:border-teal-600 focus:ring-2 focus:ring-focus"
               placeholder="enseignant@example.com"
             />
           </label>
@@ -183,7 +183,7 @@ export default function AuthPage() {
               onChange={(event) => setPassword(event.target.value)}
               required
               minLength={6}
-              className="rounded-md border border-slate-300 px-3 py-3 text-sm outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-100"
+              className="rounded-md border border-slate-300 px-3 py-3 text-sm outline-none focus:border-teal-600 focus:ring-2 focus:ring-focus"
               placeholder="6 caractères minimum"
             />
           </label>
@@ -195,7 +195,7 @@ export default function AuthPage() {
           <button
             type="submit"
             disabled={loading || !supabaseConfigured}
-            className="rounded-md bg-teal-700 px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-teal-800 disabled:cursor-not-allowed disabled:bg-slate-400"
+            className="rounded-md bg-teal-700 px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-teal-800 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400 disabled:shadow-none"
           >
             {loading ? "Chargement..." : mode === "connexion" ? "Se connecter" : "Créer le compte"}
           </button>

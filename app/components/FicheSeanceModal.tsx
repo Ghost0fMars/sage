@@ -115,7 +115,7 @@ export default function FicheSeanceModal({
             <input
               value={local.titre}
               onChange={(e) => setLesson({ titre: e.target.value })}
-              className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-xl font-bold text-slate-950 outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-100"
+              className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-xl font-bold text-slate-950 outline-none focus:border-teal-600 focus:ring-2 focus:ring-focus"
             />
           </label>
 
@@ -124,7 +124,7 @@ export default function FicheSeanceModal({
             <textarea
               value={local.objectif}
               onChange={(e) => setLesson({ objectif: e.target.value })}
-              className="min-h-16 w-full rounded-md border border-slate-300 bg-white px-3 py-2 leading-7 text-slate-700 outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-100"
+              className="min-h-16 w-full rounded-md border border-slate-300 bg-white px-3 py-2 leading-7 text-slate-700 outline-none focus:border-teal-600 focus:ring-2 focus:ring-focus"
             />
           </label>
 
@@ -157,7 +157,7 @@ export default function FicheSeanceModal({
               onChange={(e) => setLesson({ materiel: e.target.value.split("\n").filter(Boolean) })}
               rows={2}
               placeholder="Un élément par ligne"
-              className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-100"
+              className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 outline-none focus:border-teal-600 focus:ring-2 focus:ring-focus"
             />
           </label>
 
@@ -192,7 +192,7 @@ export default function FicheSeanceModal({
                 <input
                   value={phase.nom}
                   onChange={(e) => setPhase(index, { nom: e.target.value })}
-                  className="mt-3 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-base font-semibold text-slate-950 outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-100"
+                  className="mt-3 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-base font-semibold text-slate-950 outline-none focus:border-teal-600 focus:ring-2 focus:ring-focus"
                 />
 
                 <dl className="mt-3 grid gap-3 text-sm">
@@ -202,7 +202,7 @@ export default function FicheSeanceModal({
                       <textarea
                         value={phase.role_enseignant}
                         onChange={(e) => setPhase(index, { role_enseignant: e.target.value })}
-                        className="mt-1 min-h-16 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-slate-700 outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-100"
+                        className="mt-1 min-h-16 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-slate-700 outline-none focus:border-teal-600 focus:ring-2 focus:ring-focus"
                       />
                     </dd>
                   </div>
@@ -212,7 +212,7 @@ export default function FicheSeanceModal({
                       <textarea
                         value={phase.consigne}
                         onChange={(e) => setPhase(index, { consigne: e.target.value })}
-                        className="mt-1 min-h-12 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-slate-700 outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-100"
+                        className="mt-1 min-h-12 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-slate-700 outline-none focus:border-teal-600 focus:ring-2 focus:ring-focus"
                       />
                     </dd>
                   </div>
@@ -222,7 +222,7 @@ export default function FicheSeanceModal({
                       <textarea
                         value={phase.role_eleves}
                         onChange={(e) => setPhase(index, { role_eleves: e.target.value })}
-                        className="mt-1 min-h-16 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-slate-700 outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-100"
+                        className="mt-1 min-h-16 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-slate-700 outline-none focus:border-teal-600 focus:ring-2 focus:ring-focus"
                       />
                     </dd>
                   </div>
@@ -266,7 +266,7 @@ export default function FicheSeanceModal({
                       <textarea
                         value={phase.materiel}
                         onChange={(e) => setPhase(index, { materiel: e.target.value })}
-                        className="mt-1 min-h-10 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-slate-700 outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-100"
+                        className="mt-1 min-h-10 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-slate-700 outline-none focus:border-teal-600 focus:ring-2 focus:ring-focus"
                       />
                     </dd>
                   </div>
@@ -283,7 +283,7 @@ export default function FicheSeanceModal({
                 <textarea
                   value={local.trace_ecrite}
                   onChange={(e) => setLesson({ trace_ecrite: e.target.value })}
-                  className="min-h-24 w-full rounded-md border border-teal-200 bg-white px-3 py-2 leading-7 text-teal-950 outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-100"
+                  className="min-h-24 w-full rounded-md border border-teal-200 bg-white px-3 py-2 leading-7 text-teal-950 outline-none focus:border-teal-600 focus:ring-2 focus:ring-focus"
                 />
               </label>
             </div>
@@ -320,7 +320,7 @@ export default function FicheSeanceModal({
               type="button"
               onClick={() => onGenerateCourse?.(local)}
               disabled={!onGenerateCourse || courseLoading}
-              className="min-w-[170px] rounded-md border border-slate-300 bg-white px-4 py-3 text-center text-sm font-semibold text-slate-900 shadow-sm transition hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-300"
+              className="min-w-[170px] rounded-md border border-slate-300 bg-white px-4 py-3 text-center text-sm font-semibold text-slate-900 shadow-sm transition hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-focus"
             >
               <GeneratingLabel
                 active={courseLoading}

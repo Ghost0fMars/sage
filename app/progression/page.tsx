@@ -266,7 +266,7 @@ export default function ProgressionPage() {
                 <select
                   value={nouvelleEvaluation.sequenceId}
                   onChange={(event) => choisirSequence(event.target.value)}
-                  className="w-full min-w-0 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-100"
+                  className="w-full min-w-0 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-teal-600 focus:ring-2 focus:ring-focus"
                 >
                   <option value="">Saisie libre</option>
                   {sequences.map((sequence) => (
@@ -288,7 +288,7 @@ export default function ProgressionPage() {
                         classeId: event.target.value
                       }))
                     }
-                    className="w-full min-w-0 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-100"
+                    className="w-full min-w-0 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-teal-600 focus:ring-2 focus:ring-focus"
                   >
                     <option value="">Tous les élèves</option>
                     {classes.map((classe) => (
@@ -310,7 +310,7 @@ export default function ProgressionPage() {
                       titre: event.target.value
                     }))
                   }
-                  className="w-full min-w-0 rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-100"
+                  className="w-full min-w-0 rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:border-teal-600 focus:ring-2 focus:ring-focus"
                 />
               </label>
 
@@ -325,7 +325,7 @@ export default function ProgressionPage() {
                       date: event.target.value
                     }))
                   }
-                  className="w-full min-w-0 rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-100"
+                  className="w-full min-w-0 rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:border-teal-600 focus:ring-2 focus:ring-focus"
                 />
               </label>
 
@@ -339,7 +339,7 @@ export default function ProgressionPage() {
                       domaine: event.target.value
                     }))
                   }
-                  className="w-full min-w-0 rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-100"
+                  className="w-full min-w-0 rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:border-teal-600 focus:ring-2 focus:ring-focus"
                 />
               </label>
 
@@ -353,7 +353,7 @@ export default function ProgressionPage() {
                       competence: event.target.value
                     }))
                   }
-                  className="min-h-20 w-full min-w-0 resize-y rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-100"
+                  className="min-h-20 w-full min-w-0 resize-y rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:border-teal-600 focus:ring-2 focus:ring-focus"
                 />
               </label>
 
@@ -361,7 +361,7 @@ export default function ProgressionPage() {
                 type="button"
                 onClick={creerEvaluation}
                 disabled={eleves.length === 0}
-                className="w-full rounded-md bg-teal-700 px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-teal-800 disabled:cursor-not-allowed disabled:bg-slate-400"
+                className="w-full rounded-md bg-teal-700 px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-teal-800 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400 disabled:shadow-none"
               >
                 Créer l'évaluation
               </button>
@@ -474,7 +474,7 @@ export default function ProgressionPage() {
                                     niveau: event.target.value as NiveauAcquisition
                                   })
                                 }
-                                className="rounded-md border border-slate-300 bg-white px-3 py-2 outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-100"
+                                className="rounded-md border border-slate-300 bg-white px-3 py-2 outline-none focus:border-teal-600 focus:ring-2 focus:ring-focus"
                               >
                                 {niveaux.map((niveau) => (
                                   <option key={niveau} value={niveau}>
@@ -492,7 +492,7 @@ export default function ProgressionPage() {
                                   })
                                 }
                                 placeholder="Observation courte"
-                                className="w-full rounded-md border border-slate-300 px-3 py-2 outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-100"
+                                className="w-full rounded-md border border-slate-300 px-3 py-2 outline-none focus:border-teal-600 focus:ring-2 focus:ring-focus"
                               />
                             </td>
                           </tr>

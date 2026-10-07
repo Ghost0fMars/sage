@@ -301,18 +301,18 @@ export default function TableauDeBord() {
             </p>
             <a
               href="/planning"
-              className="mt-8 inline-flex rounded-md bg-teal-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-100"
+              className="mt-8 inline-flex rounded-md bg-teal-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-focus"
             >
               Ouvrir le planning
             </a>
           </article>
 
-          <article className="rounded-lg bg-teal-600 p-5 text-white shadow-sm">
-            <p className="text-sm font-semibold text-white/70">Progression du programme</p>
-            <p className="mt-3 text-3xl font-bold">{progression}%</p>
-            <p className="mt-1 text-sm text-white/80">Préparations enregistrées</p>
-            <div className="mt-5 h-2 rounded-full bg-white/25">
-              <div className="h-2 rounded-full bg-white" style={{ width: `${progression}%` }} />
+          <article className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+            <p className="text-sm font-semibold text-slate-600">Progression du programme</p>
+            <p className="mt-3 text-3xl font-bold text-slate-950">{progression}%</p>
+            <p className="mt-1 text-sm text-slate-600">Préparations enregistrées</p>
+            <div className="mt-5 h-2 rounded-full bg-slate-100">
+              <div className="h-2 rounded-full bg-teal-500" style={{ width: `${progression}%` }} />
             </div>
           </article>
         </section>
@@ -332,7 +332,7 @@ export default function TableauDeBord() {
                 <select
                   value={dateCahierJournal}
                   onChange={(event) => setDateCahierJournal(event.target.value)}
-                  className="rounded-md border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-100"
+                  className="rounded-md border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-teal-600 focus:ring-2 focus:ring-focus"
                 >
                   {datesDisponibles.length === 0 && <option value="">Aucune date</option>}
                   {datesDisponibles.map((date) => (
@@ -343,7 +343,7 @@ export default function TableauDeBord() {
                 </select>
                 <a
                   href="/planning"
-                  className="rounded-sm text-sm font-semibold text-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-100"
+                  className="rounded-sm text-sm font-semibold text-teal-700 focus:outline-none focus:ring-2 focus:ring-focus"
                 >
                   Voir tout
                 </a>
@@ -404,12 +404,12 @@ export default function TableauDeBord() {
                 type="date"
                 value={dateAgenda}
                 onChange={(event) => setDateAgenda(event.target.value)}
-                className="rounded-md border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-100"
+                className="rounded-md border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-teal-600 focus:ring-2 focus:ring-focus"
               />
               <button
                 type="button"
                 onClick={() => setAjoutAgendaOuvert((ouvert) => !ouvert)}
-                className="rounded-md border border-slate-300 px-3 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-teal-100"
+                className="rounded-md border border-slate-300 px-3 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-focus"
               >
                 {ajoutAgendaOuvert ? "Fermer" : "+ Ajouter"}
               </button>
@@ -425,7 +425,7 @@ export default function TableauDeBord() {
                   setNouvelEvenement((actuel) => ({ ...actuel, title: event.target.value }))
                 }
                 placeholder="Conseil d'école, réunion, sortie, rendez-vous..."
-                className="rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-100"
+                className="rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:border-teal-600 focus:ring-2 focus:ring-focus"
               />
               <input
                 type="time"
@@ -433,14 +433,14 @@ export default function TableauDeBord() {
                 onChange={(event) =>
                   setNouvelEvenement((actuel) => ({ ...actuel, time: event.target.value }))
                 }
-                className="rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-100"
+                className="rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:border-teal-600 focus:ring-2 focus:ring-focus"
               />
               <select
                 value={nouvelEvenement.type}
                 onChange={(event) =>
                   setNouvelEvenement((actuel) => ({ ...actuel, type: event.target.value }))
                 }
-                className="rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-100"
+                className="rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:border-teal-600 focus:ring-2 focus:ring-focus"
               >
                 {typesEvenements.map((type) => (
                   <option key={type} value={type}>
@@ -455,12 +455,12 @@ export default function TableauDeBord() {
                 }
                 placeholder="Notes facultatives"
                 rows={2}
-                className="rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-100 md:col-span-2"
+                className="rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:border-teal-600 focus:ring-2 focus:ring-focus md:col-span-2"
               />
               <button
                 type="button"
                 onClick={ajouterEvenementAgenda}
-                className="rounded-md bg-teal-700 px-4 py-2 text-sm font-semibold text-white transition hover:bg-teal-800 focus:outline-none focus:ring-2 focus:ring-teal-100"
+                className="rounded-md bg-teal-700 px-4 py-2 text-sm font-semibold text-white transition hover:bg-teal-800 focus:outline-none focus:ring-2 focus:ring-focus"
               >
                 Ajouter
               </button>
@@ -500,7 +500,7 @@ export default function TableauDeBord() {
                             supprimerEvenementAgenda(evenement.id);
                           }
                         }}
-                        className="rounded-md border border-slate-300 px-3 py-2 text-xs font-semibold text-slate-700 transition hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-teal-100"
+                        className="rounded-md border border-slate-300 px-3 py-2 text-xs font-semibold text-slate-700 transition hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-focus"
                       >
                         Supprimer
                       </button>

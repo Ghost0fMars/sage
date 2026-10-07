@@ -475,7 +475,7 @@ export default function PlanningPage() {
                 type="date"
                 value={semaineDebut}
                 onChange={(event) => setSemaineDebut(formatDateInput(lundiDeLaSemaine(new Date(`${event.target.value}T00:00:00`))))}
-                className="rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-100"
+                className="rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:border-teal-600 focus:ring-2 focus:ring-focus"
               />
             </label>
             {classes.length > 0 && (
@@ -487,7 +487,7 @@ export default function PlanningPage() {
                     setClasseFiltreId(event.target.value);
                     setNiveauFiltre("");
                   }}
-                  className="rounded-md border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-100"
+                  className="rounded-md border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-teal-600 focus:ring-2 focus:ring-focus"
                 >
                   <option value="">Toutes mes classes</option>
                   {classes.map((classe) => (
@@ -504,7 +504,7 @@ export default function PlanningPage() {
                 <select
                   value={niveauFiltre}
                   onChange={(event) => setNiveauFiltre(event.target.value)}
-                  className="rounded-md border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-100"
+                  className="rounded-md border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-teal-600 focus:ring-2 focus:ring-focus"
                 >
                   <option value="">Tous les niveaux</option>
                   {niveauxDisponibles.map((niveau) => (
@@ -721,7 +721,7 @@ export default function PlanningPage() {
                     <button
                       type="button"
                       onClick={() => setFicheOuverteId(tuileSelectionnee.id)}
-                      className="rounded-md bg-slate-900 px-3 py-2 text-sm font-semibold text-white transition hover:bg-slate-800"
+                      className="rounded-md bg-teal-700 px-3 py-2 text-sm font-semibold text-white transition hover:bg-teal-800"
                     >
                       Afficher la fiche de séance
                     </button>

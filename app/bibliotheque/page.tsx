@@ -669,7 +669,7 @@ export default function BibliothequePage() {
                 <select
                   value={classeFiltreId}
                   onChange={(event) => setClasseFiltreId(event.target.value)}
-                  className="rounded-md border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-100"
+                  className="rounded-md border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-teal-600 focus:ring-2 focus:ring-focus"
                 >
                   <option value="">Toutes mes classes</option>
                   {classes.map((classe) => (
@@ -688,7 +688,7 @@ export default function BibliothequePage() {
             <a href="/preparation" className="rounded-md border border-slate-300 bg-white px-4 py-3 text-sm font-semibold text-slate-900 shadow-sm transition hover:bg-slate-100">
               Préparer une séance
             </a>
-            <a href="/planning" className="rounded-md bg-slate-900 px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800">
+            <a href="/planning" className="rounded-md bg-teal-700 px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-teal-800">
               Ouvrir le planning
             </a>
           </div>
@@ -923,7 +923,7 @@ export default function BibliothequePage() {
                                     <button
                                       type="button"
                                       onClick={() => setCoursEnViewer(item)}
-                                      className="flex items-center gap-1.5 rounded-md bg-slate-900 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-700"
+                                      className="flex items-center gap-1.5 rounded-md bg-teal-700 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-teal-800"
                                     >
                                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                                         <rect x="2" y="3" width="20" height="14" rx="2"/>
@@ -1055,7 +1055,7 @@ export default function BibliothequePage() {
                                         titre: e.target.value
                                       })
                                     }
-                                    className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 font-semibold text-slate-950 outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-100"
+                                    className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 font-semibold text-slate-950 outline-none focus:border-teal-600 focus:ring-2 focus:ring-focus"
                                   />
                                 </label>
                                 <label className="grid gap-2 text-sm leading-6 text-slate-700">
@@ -1070,7 +1070,7 @@ export default function BibliothequePage() {
                                         intention: e.target.value
                                       })
                                     }
-                                    className="min-h-20 w-full rounded-md border border-slate-300 bg-white px-3 py-2 outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-100"
+                                    className="min-h-20 w-full rounded-md border border-slate-300 bg-white px-3 py-2 outline-none focus:border-teal-600 focus:ring-2 focus:ring-focus"
                                   />
                                 </label>
                                 <p className="mt-2 text-sm leading-6 text-slate-700">
@@ -1136,7 +1136,7 @@ export default function BibliothequePage() {
                                                                   { titre: e.target.value }
                                                                 )
                                                               }
-                                                              className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 font-semibold text-slate-950 outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-100"
+                                                              className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 font-semibold text-slate-950 outline-none focus:border-teal-600 focus:ring-2 focus:ring-focus"
                                                             />
                                                           </label>
                                                           <p className="mt-1 text-sm font-medium uppercase tracking-wide text-slate-500">
@@ -1157,7 +1157,7 @@ export default function BibliothequePage() {
                                                               type="button"
                                                               onClick={() => renvoyerEnReserve(fiche)}
                                                               disabled={estReservee}
-                                                              className="rounded-md bg-teal-700 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-teal-800 disabled:cursor-not-allowed disabled:bg-slate-400"
+                                                              className="rounded-md bg-teal-700 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-teal-800 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400 disabled:shadow-none"
                                                             >
                                                               {estReservee ? "Réservée" : "Envoyer dans la réserve"}
                                                             </button>
@@ -1167,7 +1167,7 @@ export default function BibliothequePage() {
                                                             type="button"
                                                             onClick={() => preparerSeance(sequence, seance)}
                                                             disabled={preparationEnCours === idPreparation}
-                                                            className="rounded-md bg-slate-900 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 disabled:cursor-wait disabled:bg-slate-400"
+                                                            className="rounded-md bg-teal-700 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-teal-800 disabled:cursor-wait disabled:bg-slate-100 disabled:text-slate-400 disabled:shadow-none"
                                                           >
                                                             {preparationEnCours === idPreparation
                                                               ? "Préparation..."
@@ -1226,7 +1226,7 @@ export default function BibliothequePage() {
               <button
                 type="button"
                 onClick={() => imprimerFiche(ficheEnModal)}
-                className="rounded-md bg-slate-900 px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-300"
+                className="rounded-md bg-teal-700 px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-teal-800 focus:outline-none focus:ring-2 focus:ring-focus"
               >
                 Imprimer
               </button>
@@ -1237,7 +1237,7 @@ export default function BibliothequePage() {
                   setFicheEnModal(null);
                 }}
                 disabled={tuilesPlanning.some((t) => t.preparedLessonId === ficheEnModal.id)}
-                className="rounded-md bg-teal-700 px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-teal-800 focus:outline-none focus:ring-2 focus:ring-teal-300 disabled:cursor-not-allowed disabled:bg-slate-400"
+                className="rounded-md bg-teal-700 px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-teal-800 focus:outline-none focus:ring-2 focus:ring-focus disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400 disabled:shadow-none"
               >
                 {tuilesPlanning.some((t) => t.preparedLessonId === ficheEnModal.id)
                   ? "Réservée"

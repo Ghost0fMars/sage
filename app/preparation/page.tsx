@@ -951,7 +951,7 @@ export default function PagePreparation() {
           </div>
           <a
             href="/"
-            className="rounded-md border border-slate-300 bg-white px-4 py-3 text-sm font-semibold text-slate-900 shadow-sm transition hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-300"
+            className="rounded-md border border-slate-300 bg-white px-4 py-3 text-sm font-semibold text-slate-900 shadow-sm transition hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-focus"
           >
             Tableau de bord
           </a>
@@ -961,14 +961,14 @@ export default function PagePreparation() {
           <button
             type="button"
             onClick={() => { setModePrompt(false); setErreur(""); }}
-            className={`rounded-md px-4 py-2 text-sm font-semibold transition focus:outline-none focus:ring-2 focus:ring-teal-300 ${!modePrompt ? "bg-teal-700 text-white shadow-sm" : "border border-slate-300 bg-white text-slate-700 hover:bg-slate-50"}`}
+            className={`rounded-md px-4 py-2 text-sm font-semibold transition focus:outline-none focus:ring-2 focus:ring-focus ${!modePrompt ? "bg-teal-700 text-white shadow-sm" : "border border-slate-300 bg-white text-slate-700 hover:bg-slate-50"}`}
           >
             Par référentiel
           </button>
           <button
             type="button"
             onClick={() => { setModePrompt(true); setErreur(""); }}
-            className={`rounded-md px-4 py-2 text-sm font-semibold transition focus:outline-none focus:ring-2 focus:ring-teal-300 ${modePrompt ? "bg-teal-700 text-white shadow-sm" : "border border-slate-300 bg-white text-slate-700 hover:bg-slate-50"}`}
+            className={`rounded-md px-4 py-2 text-sm font-semibold transition focus:outline-none focus:ring-2 focus:ring-focus ${modePrompt ? "bg-teal-700 text-white shadow-sm" : "border border-slate-300 bg-white text-slate-700 hover:bg-slate-50"}`}
           >
             Par prompt libre
           </button>
@@ -981,7 +981,7 @@ export default function PagePreparation() {
                   setClasseId(e.target.value);
                   changerSelection("cycle", "");
                 }}
-                className="rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-normal text-slate-950 shadow-sm outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-100"
+                className="rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-normal text-slate-950 shadow-sm outline-none focus:border-teal-600 focus:ring-2 focus:ring-focus"
               >
                 <option value="">Toutes mes classes</option>
                 {classes.map((classe) => (
@@ -1005,7 +1005,7 @@ export default function PagePreparation() {
                 onChange={(e) => setPromptLibre(e.target.value)}
                 placeholder="Ex. : Prépare une séquence sur l'alimentation et la santé pour une classe de CM2 en 5 séances."
                 rows={4}
-                className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm leading-7 text-slate-950 shadow-sm outline-none transition focus:border-teal-600 focus:ring-2 focus:ring-teal-100"
+                className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm leading-7 text-slate-950 shadow-sm outline-none transition focus:border-teal-600 focus:ring-2 focus:ring-focus"
               />
             </label>
             {erreur && (
@@ -1018,7 +1018,7 @@ export default function PagePreparation() {
               type="button"
               onClick={genererSequenceDepuisPrompt}
               disabled={generationPromptEnCours || !promptLibre.trim()}
-              className="mt-4 w-full rounded-md bg-teal-700 px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-teal-800 focus:outline-none focus:ring-2 focus:ring-teal-300 disabled:cursor-not-allowed disabled:bg-slate-400"
+              className="mt-4 w-full rounded-md bg-teal-700 px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-teal-800 focus:outline-none focus:ring-2 focus:ring-focus disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400 disabled:shadow-none"
             >
               <GeneratingLabel
                 active={generationPromptEnCours}
@@ -1042,7 +1042,7 @@ export default function PagePreparation() {
                       value={selection[etape.id]}
                       disabled={etape.disabled}
                       onChange={(e) => changerSelection(etape.id, e.target.value)}
-                      className="min-h-11 w-full min-w-0 max-w-full truncate rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-950 shadow-sm outline-none transition focus:border-teal-600 focus:ring-2 focus:ring-teal-100 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-500"
+                      className="min-h-11 w-full min-w-0 max-w-full truncate rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-950 shadow-sm outline-none transition focus:border-teal-600 focus:ring-2 focus:ring-focus disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-500"
                     >
                       <option value="">Sélectionner...</option>
                       {etape.options.map((option) => (
@@ -1070,7 +1070,7 @@ export default function PagePreparation() {
                 type="button"
                 onClick={genererObjectif}
                 disabled={generationEnCours}
-                className="mt-5 w-full rounded-md bg-teal-700 px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-teal-800 focus:outline-none focus:ring-2 focus:ring-teal-300 disabled:cursor-wait disabled:bg-teal-900/60"
+                className="mt-5 w-full rounded-md bg-teal-700 px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-teal-800 focus:outline-none focus:ring-2 focus:ring-focus disabled:cursor-wait disabled:bg-teal-900/60"
               >
                 <GeneratingLabel
                   active={generationEnCours}
@@ -1097,7 +1097,7 @@ export default function PagePreparation() {
                 type="button"
                 onClick={genererSequence}
                 disabled={!objectif || sequenceEnCours}
-                className="mt-5 w-full rounded-md bg-slate-900 px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-300 disabled:cursor-not-allowed disabled:bg-slate-400"
+                className="mt-5 w-full rounded-md bg-teal-700 px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-teal-800 focus:outline-none focus:ring-2 focus:ring-focus disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400 disabled:shadow-none"
               >
                 <GeneratingLabel
                   active={sequenceEnCours}
@@ -1125,7 +1125,7 @@ export default function PagePreparation() {
                 <input
                   value={sequence.titre}
                   onChange={(e) => modifierSequence({ ...sequence, titre: e.target.value })}
-                  className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-2xl font-bold text-slate-950 outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-100"
+                  className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-2xl font-bold text-slate-950 outline-none focus:border-teal-600 focus:ring-2 focus:ring-focus"
                 />
               </label>
               <label className="mt-3 grid gap-2">
@@ -1133,7 +1133,7 @@ export default function PagePreparation() {
                 <textarea
                   value={sequence.intention}
                   onChange={(e) => modifierSequence({ ...sequence, intention: e.target.value })}
-                  className="min-h-20 w-full rounded-md border border-slate-300 bg-white px-3 py-2 leading-7 text-slate-700 outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-100"
+                  className="min-h-20 w-full rounded-md border border-slate-300 bg-white px-3 py-2 leading-7 text-slate-700 outline-none focus:border-teal-600 focus:ring-2 focus:ring-focus"
                 />
               </label>
             </div>
@@ -1164,7 +1164,7 @@ export default function PagePreparation() {
                     <input
                       value={seance.titre}
                       onChange={(e) => modifierSeance(seance.numero, { titre: e.target.value })}
-                      className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-lg font-semibold text-slate-950 outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-100"
+                      className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-lg font-semibold text-slate-950 outline-none focus:border-teal-600 focus:ring-2 focus:ring-focus"
                     />
                   </label>
 
@@ -1175,7 +1175,7 @@ export default function PagePreparation() {
                         <textarea
                           value={seance.beat.amorce}
                           onChange={(e) => modifierBeat(seance.numero, { amorce: e.target.value })}
-                          className="mt-1 min-h-16 w-full rounded-md border border-slate-300 bg-white px-3 py-2 outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-100"
+                          className="mt-1 min-h-16 w-full rounded-md border border-slate-300 bg-white px-3 py-2 outline-none focus:border-teal-600 focus:ring-2 focus:ring-focus"
                         />
                       </dd>
                     </div>
@@ -1185,7 +1185,7 @@ export default function PagePreparation() {
                         <textarea
                           value={seance.beat.recherche}
                           onChange={(e) => modifierBeat(seance.numero, { recherche: e.target.value })}
-                          className="mt-1 min-h-16 w-full rounded-md border border-slate-300 bg-white px-3 py-2 outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-100"
+                          className="mt-1 min-h-16 w-full rounded-md border border-slate-300 bg-white px-3 py-2 outline-none focus:border-teal-600 focus:ring-2 focus:ring-focus"
                         />
                       </dd>
                     </div>
@@ -1195,7 +1195,7 @@ export default function PagePreparation() {
                         <textarea
                           value={seance.beat.mise_en_commun}
                           onChange={(e) => modifierBeat(seance.numero, { mise_en_commun: e.target.value })}
-                          className="mt-1 min-h-16 w-full rounded-md border border-slate-300 bg-white px-3 py-2 outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-100"
+                          className="mt-1 min-h-16 w-full rounded-md border border-slate-300 bg-white px-3 py-2 outline-none focus:border-teal-600 focus:ring-2 focus:ring-focus"
                         />
                       </dd>
                     </div>
@@ -1208,7 +1208,7 @@ export default function PagePreparation() {
                             onChange={(e) =>
                               modifierBeat(seance.numero, { institutionnalisation: e.target.value })
                             }
-                            className="mt-1 min-h-16 w-full rounded-md border border-teal-200 bg-teal-50 px-3 py-2 outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-100"
+                            className="mt-1 min-h-16 w-full rounded-md border border-teal-200 bg-teal-50 px-3 py-2 outline-none focus:border-teal-600 focus:ring-2 focus:ring-focus"
                           />
                         </dd>
                       </div>
@@ -1219,7 +1219,7 @@ export default function PagePreparation() {
                         <textarea
                           value={seance.beat.entrainement}
                           onChange={(e) => modifierBeat(seance.numero, { entrainement: e.target.value })}
-                          className="mt-1 min-h-16 w-full rounded-md border border-slate-300 bg-white px-3 py-2 outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-100"
+                          className="mt-1 min-h-16 w-full rounded-md border border-slate-300 bg-white px-3 py-2 outline-none focus:border-teal-600 focus:ring-2 focus:ring-focus"
                         />
                       </dd>
                     </div>
@@ -1253,7 +1253,7 @@ export default function PagePreparation() {
                     type="button"
                     onClick={() => genererSeance(seance)}
                     disabled={seanceEnCours !== null}
-                    className="mt-4 min-w-[220px] rounded-md bg-teal-700 px-4 py-2 text-center text-sm font-semibold text-white shadow-sm transition hover:bg-teal-800 focus:outline-none focus:ring-2 focus:ring-teal-300 disabled:cursor-wait disabled:bg-teal-900/60"
+                    className="mt-4 min-w-[220px] rounded-md bg-teal-700 px-4 py-2 text-center text-sm font-semibold text-white shadow-sm transition hover:bg-teal-800 focus:outline-none focus:ring-2 focus:ring-focus disabled:cursor-wait disabled:bg-teal-900/60"
                   >
                     <GeneratingLabel
                       active={seanceEnCours === seance.numero}
@@ -1285,7 +1285,7 @@ export default function PagePreparation() {
                 <button
                   type="button"
                   onClick={imprimerSeance}
-                  className="rounded-md bg-slate-900 px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-300"
+                  className="rounded-md bg-teal-700 px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-teal-800 focus:outline-none focus:ring-2 focus:ring-focus"
                 >
                   Exporter en PDF
                 </button>
@@ -1293,19 +1293,19 @@ export default function PagePreparation() {
                   type="button"
                   onClick={planifierSeance}
                   disabled={seanceEnReserve}
-                  className="rounded-md bg-teal-700 px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-teal-800 focus:outline-none focus:ring-2 focus:ring-teal-300 disabled:cursor-not-allowed disabled:bg-slate-400"
+                  className="rounded-md bg-teal-700 px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-teal-800 focus:outline-none focus:ring-2 focus:ring-focus disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400 disabled:shadow-none"
                 >
                   {seanceEnReserve ? "Réservée" : "Planifier"}
                 </button>
                 <a
                   href="/planning"
-                  className="rounded-md border border-slate-300 bg-white px-4 py-3 text-sm font-semibold text-slate-900 shadow-sm transition hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-300"
+                  className="rounded-md border border-slate-300 bg-white px-4 py-3 text-sm font-semibold text-slate-900 shadow-sm transition hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-focus"
                 >
                   Ouvrir le planning
                 </a>
                 <a
                   href="/bibliotheque"
-                  className="rounded-md border border-slate-300 bg-white px-4 py-3 text-sm font-semibold text-slate-900 shadow-sm transition hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-300"
+                  className="rounded-md border border-slate-300 bg-white px-4 py-3 text-sm font-semibold text-slate-900 shadow-sm transition hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-focus"
                 >
                   Voir la bibliothèque
                 </a>

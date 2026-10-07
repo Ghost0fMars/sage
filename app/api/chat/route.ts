@@ -23,6 +23,12 @@ async function verifierUtilisateur(request: NextRequest) {
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
   const token = getBearerToken(request);
 
+  // Clé Albert personnelle fournie par l'enseignant : elle paie ses propres appels, le compte
+  // validé n'est exigé que pour protéger la clé partagée du serveur.
+  if (request.headers.get("x-albert-key")?.trim()) {
+    return { user: null } as const;
+  }
+
   if (!supabaseUrl || !supabaseAnonKey) {
     // Application locale (Electron) sans Supabase configuré : pas de compte à
     // vérifier, l'accès à l'assistant est ouvert (comme le reste de l'app).

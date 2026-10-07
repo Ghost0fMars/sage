@@ -25,6 +25,16 @@ def propre(t):
     return re.sub(r"\s+", " ", unicodedata.normalize("NFKC", t)).strip(" .:·•…_-")
 
 
+MOT_OUTIL = re.compile(r"(de|des|du|la|le|les|un|une|et|à|au|aux|en|pour|par|sur|l'|d'|dans|avec|ou)$", re.I)
+# Les guides pédagogiques suivent un plan type : séquence > focus > étape/temps (même police, donc niveau déduit du libellé)
+TYPES = ((re.compile(r"^(proposition de séquence|séquence)\s*n", re.I), 1), (re.compile(r"^focus\s*\d", re.I), 2),
+         (re.compile(r"^(étape|temps)\s*\d", re.I), 3))
+
+
+def NIVEAU_TYPE(titre, niveau):
+    return next((n for r, n in TYPES if r.match(titre)), niveau)
+
+
 def titres_par_police(doc):
     """[(niveau, titre, page)] d'après les tailles de police ; niveaux 1 à 3."""
     lignes, taille_corps = [], collections.Counter()
@@ -49,7 +59,16 @@ def titres_par_police(doc):
 
     # en-têtes courants « 7—Introduction » et titres de la page « Sommaire » elle-même
     courant = re.compile(r"^\d+\s*[—–-]|[—–-]\s*\d+$|^sommaire$", re.I)
-    cands = [(n, t, g, tx, y) for n, t, g, tx, y in lignes if candidat(t, g, tx) and not courant.search(tx)]
+    # pages de sommaire : leurs lignes sont des renvois, pas des titres (le vrai titre est indexé à sa page).
+    # Marque : beaucoup de numéros de page isolés, ou le mot « Sommaire » avec quelques-uns.
+    nums, mot = collections.Counter(), set()
+    for n, _, _, tx, _ in lignes:
+        nums[n] += bool(re.fullmatch(r"\d{1,3}", tx))
+        if re.fullmatch(r"sommaire|table des mati[èe]res", tx, re.I):
+            mot.add(n)
+    sommaires = {n for n in nums if n <= 20 and (nums[n] >= 6 or n in mot and nums[n] >= 3)}
+    cands = [(n, t, g, tx, y) for n, t, g, tx, y in lignes
+             if n not in sommaires and candidat(t, g, tx) and not courant.search(tx)]
     freq = collections.Counter(tx for _, _, _, tx, _ in cands)
     cands = [c for c in cands if freq[c[3]] <= 2]  # en-têtes et pieds de page répétés
     styles = collections.Counter((t, g) for _, t, g, _, _ in cands)
@@ -60,18 +79,29 @@ def titres_par_police(doc):
         if (t, g) not in rang:
             continue
         niv = rang[(t, g)]
-        if sortie and sortie[-1][2] == n and sortie[-1][0] == niv and (
-                abs(y - sortie[-1][3]) < t * 2.2 or tx[0].islower() and not sortie[-1][1].endswith((".", "?", "!"))):
-            sortie[-1][1] += " " + tx  # titre sur plusieurs lignes
-            sortie[-1][3] = y
+        prec = sortie[-1] if sortie else None
+        # un titre sur plusieurs lignes : ligne suivante rapprochée, et soit elle commence en minuscule,
+        # soit la précédente s'arrête sur un mot-outil ou remplit la largeur ; deux titres distincts ne fusionnent pas
+        suite = (prec and prec[2] == n and prec[0] == niv and y - prec[3] < t * 1.8 and len(prec[1] + tx) <= 130 and (
+            tx[0].islower() and not prec[1].endswith((".", "?", "!", ":"))
+            or MOT_OUTIL.search(prec[1]) or len(prec[1]) >= 55 and not prec[1].endswith((".", "?", "!", ":"))
+        ))
+        if suite:
+            prec[1] += " " + tx
+            prec[3] = y
+        elif tx[0].islower() and not re.match(r"\d", tx):
+            continue  # début de phrase ou fragment : pas un titre
         else:
             sortie.append([niv, tx, n, y])
-    plat = [(a, b, c) for a, b, c, _ in sortie]
+    plat = [(a, b, c) for a, b, c, _ in sortie if len(b) <= 110]
     # titre de couverture seul au niveau 1 : on le retire et on remonte les niveaux suivants
     for _ in range(2):
         if len(plat) > 12 and sum(a == 1 for a, _, _ in plat) < 4:
             plat = [(max(a - 1, 1), b, c) for a, b, c in plat if a > 1]
-    return plat[:400]
+    if any(TYPES[0][0].match(b) for _, b, _ in plat):  # guide à séquences : tout le reste se range en dessous
+        plat = [(a if TYPES[0][0].match(b) else max(a, 2), b, c) for a, b, c in plat]
+        return [(4 if TYPES[2][0].match(b) else 3 if TYPES[1][0].match(b) else a, b, c) for a, b, c in plat][:400]
+    return [(NIVEAU_TYPE(b, a), b, c) for a, b, c in plat][:400]
 
 
 def sommaire(doc):

@@ -16,7 +16,7 @@ function getAlbertApiKey(): string {
   const apiKey = enteteRequete("x-albert-key") || process.env.ALBERT_API_KEY;
   if (!apiKey) {
     throw new Error(
-      "Albert IA n'est pas configuré : saisissez votre clé API dans Paramètres › Assistant IA."
+      "Sage n'est pas configuré : saisissez votre clé API dans Paramètres › Assistant IA."
     );
   }
   return apiKey;
@@ -55,7 +55,7 @@ export async function callAlbert(
 
   if (!response.ok) {
     const details = await response.text();
-    throw new Error(`Erreur Albert IA (${response.status}) : ${details.slice(0, 300)}`);
+    throw new Error(`Erreur Sage (${response.status}) : ${details.slice(0, 300)}`);
   }
 
   const data = (await response.json()) as AlbertChatResponse;
@@ -69,7 +69,7 @@ async function postAlbert<T>(chemin: string, corps: object, delai = 15000): Prom
     body: JSON.stringify(corps),
     signal: AbortSignal.timeout(delai)
   });
-  if (!response.ok) throw new Error(`Erreur Albert IA (${response.status}) : ${(await response.text()).slice(0, 300)}`);
+  if (!response.ok) throw new Error(`Erreur Sage (${response.status}) : ${(await response.text()).slice(0, 300)}`);
   return (await response.json()) as T;
 }
 

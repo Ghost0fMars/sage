@@ -140,6 +140,44 @@ const SUGGESTIONS = [
   "Comment a évolué [prénom] depuis le début de l'année ?"
 ];
 
+// Rend le balisage Markdown courant des réponses du modèle (titres #, gras **, puces, filets ---)
+// sans injecter de HTML.
+function Gras({ texte }: { texte: string }) {
+  return (
+    <>
+      {texte.split(/\*\*([\s\S]+?)\*\*/g).map((morceau, i) =>
+        i % 2 === 1 ? <strong key={i} className="font-semibold">{morceau}</strong> : morceau
+      )}
+    </>
+  );
+}
+
+function TexteEnrichi({ texte }: { texte: string }) {
+  return (
+    <>
+      {texte.split("\n").map((ligne, i) => {
+        const titre = /^\s{0,3}#{1,6}\s+(.*)$/.exec(ligne);
+        if (titre) {
+          return <span key={i} className="mt-2 block text-[0.95rem] font-semibold first:mt-0"><Gras texte={titre[1]} /></span>;
+        }
+        if (/^\s*([-*_])\1{2,}\s*$/.test(ligne)) {
+          return <hr key={i} className="my-2 border-slate-300" />;
+        }
+        const puce = /^\s*[-*]\s+(.*)$/.exec(ligne);
+        if (puce) {
+          return (
+            <span key={i} className="flex gap-2 pl-1">
+              <span aria-hidden="true">•</span>
+              <span className="min-w-0"><Gras texte={puce[1]} /></span>
+            </span>
+          );
+        }
+        return <span key={i} className="block min-h-[1em]"><Gras texte={ligne} /></span>;
+      })}
+    </>
+  );
+}
+
 export default function AssistantChat() {
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -160,6 +198,22 @@ export default function AssistantChat() {
     const reglement = readUserData<ReglementInterieur | null>("sage-reglement-interieur", null);
     setContext(buildContext(eleves, evaluations, notes, reglement));
   }, [open]);
+
+  // La carte des guides (iframe) demande l'ouverture de Sage, éventuellement avec une question préremplie.
+  useEffect(() => {
+    function onMessage(event: MessageEvent) {
+      if (event.origin !== window.location.origin || event.data?.type !== "sage:ouvrir-chat") {
+        return;
+      }
+      setOpen(true);
+      if (typeof event.data.message === "string" && event.data.message) {
+        setInput(event.data.message);
+      }
+      setTimeout(() => textareaRef.current?.focus(), 50);
+    }
+    window.addEventListener("message", onMessage);
+    return () => window.removeEventListener("message", onMessage);
+  }, []);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -238,7 +292,7 @@ export default function AssistantChat() {
         type="button"
         onClick={() => setOpen(true)}
         className={`fixed bottom-[calc(env(safe-area-inset-bottom)+1rem)] right-4 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-teal-600 text-white shadow-lg transition hover:bg-teal-500 active:scale-95 sm:bottom-6 sm:right-6 ${open ? "hidden" : ""}`}
-        title="Assistant pédagogique"
+        title="Sage"
       >
         <svg
           width="22"
@@ -271,7 +325,7 @@ export default function AssistantChat() {
               >
                 <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
               </svg>
-              <span className="text-sm font-semibold">Assistant pédagogique</span>
+              <span className="text-sm font-semibold">Sage</span>
             </div>
             <div className="flex items-center gap-1">
               {messages.length > 0 && (
@@ -392,7 +446,9 @@ export default function AssistantChat() {
                           </span>
                         ) : (
                           <>
-                            <span className="whitespace-pre-wrap">{message.content}</span>
+                            <span className="whitespace-pre-wrap">
+                              {message.role === "assistant" ? <TexteEnrichi texte={message.content} /> : message.content}
+                            </span>
                             {message.sources && message.sources.length > 0 && (
                               <span className="mt-2 flex flex-wrap gap-1.5">
                                 {message.sources.map((s) => (

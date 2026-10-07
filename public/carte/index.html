@@ -49,7 +49,9 @@ html,body{margin:0;height:100%;overflow:hidden;background:var(--bg);color:var(--
 #res small{display:block;color:var(--mute)}
 .panel{position:fixed;background:var(--card);border:1px solid var(--line);border-radius:8px;box-shadow:var(--shadow);z-index:4}
 #toc{left:12px;top:60px;bottom:12px;width:400px;display:flex;flex-direction:column}
-#toc header{padding:12px 14px;border-bottom:1px solid var(--line)}
+#toc header{position:relative;padding:12px 14px;border-bottom:1px solid var(--line)}
+#toc .fermer{position:absolute;top:10px;right:12px;display:grid;place-items:center;width:28px;height:28px;padding:0;box-shadow:none}
+#toc h2{padding-right:34px}
 #toc h2{font-size:16px;line-height:1.3;font-weight:700;margin:0 0 6px;text-wrap:balance}
 #toc header p{margin:0 0 10px;color:var(--mute);font-size:12px}
 #toc .row{display:flex;gap:6px;flex-wrap:wrap}
@@ -96,15 +98,15 @@ body:has(#chat:not(.hide)) #lecteur{right:404px}
 <div class="bar">
   <input id="q" type="search" placeholder="Chercher un guide ou une rubrique…" autocomplete="off" aria-label="Chercher un guide ou une rubrique" aria-controls="res" aria-expanded="false">
   <button id="m3d" title="Basculer entre la vue 2D et la vue 3D">Vue 3D</button>
-  <button id="ask" aria-controls="chat" aria-expanded="false">Albert IA</button>
+  <button id="ask" aria-controls="chat" aria-expanded="false">Sage</button>
 </div>
 <div id="res" class="hide" role="group" aria-label="Résultats de la recherche"></div>
 <aside id="toc" class="panel hide" aria-label="Sommaire du guide"><header></header><div id="tree"></div></aside>
 <section id="lecteur" class="panel hide" aria-label="Lecteur PDF"><header><h2 id="lecteur-titre"></h2><button id="lecteur-x" aria-label="Fermer le PDF"><svg class="ic" viewBox="0 0 16 16" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8"/></svg></button></header><iframe id="lecteur-pdf" title="Document PDF"></iframe></section>
-<aside id="chat" class="panel hide" aria-label="Albert IA">
-  <header><span>Albert IA<small id="scope"></small></span><button id="x" aria-label="Fermer Albert"><svg class="ic" viewBox="0 0 16 16" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8"/></svg></button></header>
-  <div id="msgs" role="log" aria-live="polite" aria-label="Échanges avec Albert"></div>
-  <form id="f"><textarea id="t" aria-label="Votre question à Albert" placeholder="Posez une question sur le guide…"></textarea><button>Envoyer</button></form>
+<aside id="chat" class="panel hide" aria-label="Sage">
+  <header><span>Sage<small id="scope"></small></span><button id="x" aria-label="Fermer Sage"><svg class="ic" viewBox="0 0 16 16" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8"/></svg></button></header>
+  <div id="msgs" role="log" aria-live="polite" aria-label="Échanges avec Sage"></div>
+  <form id="f"><textarea id="t" aria-label="Votre question à Sage" placeholder="Posez une question sur le guide…"></textarea><button>Envoyer</button></form>
 </aside>
 <svg id="svg" tabindex="-1" role="group" aria-label="Carte des guides : familles de textes, puis guides"><g id="cam"><g id="edges"></g><g id="nodes"></g></g></svg>
 <canvas id="gl" class="hide" aria-hidden="true"></canvas>
@@ -120,7 +122,7 @@ const ORDRE = ["Guides", "Repères", "Programmes", "Attendus de fin d'année", "
 const FAMILLE = Object.fromEntries(ORDRE.map((c, i) => [c, "--f-" + ["guides", "reperes", "programmes", "attendus", "fiches", "cartographies", "autres"][i]]));
 const cut = (s, n) => s.length > n ? s.slice(0, n - 1) + "…" : s;
 const norm = s => s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
-// PDF dans la carte (visionneuse intégrée) : au-dessus de la carte, entre le sommaire et Albert.
+// PDF dans la carte (visionneuse intégrée) : au-dessus de la carte, entre le sommaire et Sage.
 let retourPdf = null;
 function ouvrirPdf(u) {
   const f = $("#lecteur-pdf"), cible = new URL(u, location.href).href;
@@ -285,9 +287,9 @@ function render(fit = true) {
   for (const n of scene) prev.set(n.key, {x: n.x, y: n.y}); // si une nouvelle scène arrive avant la fin : départ = cible
 }
 function camAjustee(sc) {
-  const L = $("#toc").classList.contains("hide") ? 0 : 420, W = innerWidth - L - ($("#chat").classList.contains("hide") ? 0 : 400), H = innerHeight, m = 280;
+  const L = $("#toc").classList.contains("hide") ? 0 : 420, W = innerWidth - L - ($("#chat").classList.contains("hide") ? 0 : 400), H = innerHeight, m = 230;
   const xs = sc.map(n => n.x), ys = sc.map(n => n.y), x0 = Math.min(...xs) - m, x1 = Math.max(...xs) + m, y0 = Math.min(...ys) - 80, y1 = Math.max(...ys) + 80;
-  const k = Math.min(W / (x1 - x0), H / (y1 - y0), .9);
+  const k = Math.min(W / (x1 - x0), H / (y1 - y0), 1.3);
   return {k, x: L + W / 2 - k * (x0 + x1) / 2, y: H / 2 - k * (y0 + y1) / 2};
 }
 const appliquerCam = () => $("#cam").setAttribute("transform", `translate(${cam.x},${cam.y}) scale(${cam.k})`);
@@ -400,11 +402,19 @@ addEventListener("keydown", e => {
   else if (view.doc) { fermer(); $("#q").focus(); }
 });
 
-function demander(q) { montrerChat(true); majPortee(); $("#t").value = q; $("#t").focus(); render(); }
+// Sage = l'assistant flottant de l'application (page parente) ; le panneau latéral ne sert que si la carte est ouverte seule.
+function ouvrirSage(q = "") {
+  if (window.parent !== window) { parent.postMessage({type: "sage:ouvrir-chat", message: q}, location.origin); return true; }
+  return false;
+}
+function demander(q) {
+  if (ouvrirSage(view.doc ? `Dans le guide « ${view.doc.titre} » : ${q}` : q)) return;
+  montrerChat(true); majPortee(); $("#t").value = q; $("#t").focus(); render();
+}
 const deplier = (t, o) => { t.setAttribute("aria-expanded", o); t.closest(".noeud").querySelector(".sous").hidden = !o; };
 function sommaire(d, chemin) {
   const p = $("#toc"), h = p.querySelector("header"); p.classList.remove("hide"); if (etroit()) montrerChat(false);
-  h.innerHTML = `<h2 tabindex="-1"></h2><p></p><div class="row"><button data-a="pdf">Ouvrir le PDF</button><button data-a="ask">Demander à Albert</button><button data-a="all">Tout déplier</button><button data-a="x" aria-label="Fermer le sommaire"><svg class="ic" viewBox="0 0 16 16" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8"/></svg></button></div>`;
+  h.innerHTML = `<button class="fermer" data-a="x" aria-label="Fermer le sommaire"><svg class="ic" viewBox="0 0 16 16" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8"/></svg></button><h2 tabindex="-1"></h2><p></p><div class="row"><button data-a="pdf">Ouvrir le PDF</button><button data-a="ask">Demander à Sage</button><button data-a="all">Tout déplier</button></div>`;
   h.querySelector("h2").textContent = d.titre;
   h.querySelector("p").textContent = `${[d.cat, ...domaines(d)].join(" › ")} · ${d.pages} pages · sommaire ${d.source === "signets" ? "issu des signets du PDF" : "reconstitué (à vérifier)"}`;
   h.onclick = e => {
@@ -416,7 +426,7 @@ function sommaire(d, chemin) {
     const pg = document.createElement("button"), q = document.createElement("button");
     pg.textContent = "p. " + s.p; pg.setAttribute("aria-label", `Ouvrir le PDF page ${s.p} : ${s.t}`); pg.title = "Ouvrir le PDF à cette page";
     pg.onclick = e => { e.stopPropagation(); ouvrirPdf(pdfUrl(d, s.p)); };
-    q.textContent = "Albert"; q.setAttribute("aria-label", `Demander à Albert : ${s.t}`); q.title = "Demander à Albert";
+    q.textContent = "Sage"; q.setAttribute("aria-label", `Demander à Sage : ${s.t}`); q.title = "Demander à Sage";
     q.onclick = e => { e.stopPropagation(); demander(`Que dit le guide à propos de « ${s.t} » ?`); };
     return [pg, q];
   };
@@ -489,17 +499,17 @@ $("#res").onkeydown = e => {
 const annoncer = t => { const a = $("#annonce"); a.textContent = ""; requestAnimationFrame(() => a.textContent = t); };
 
 
-/* Albert */
+/* Sage */
 let histo = [];
 const majPortee = () => $("#scope").textContent = view.doc ? cut(view.doc.titre, 50) : "Tous les guides";
-$("#ask").onclick = () => { const o = $("#chat").classList.contains("hide"); montrerChat(o); majPortee(); render(); if (o) $("#t").focus(); };
+$("#ask").onclick = () => { if (ouvrirSage()) return; const o = $("#chat").classList.contains("hide"); montrerChat(o); majPortee(); render(); if (o) $("#t").focus(); };
 $("#x").onclick = () => { montrerChat(false); render(); $("#ask").focus(); };
 $("#lecteur-x").onclick = fermerPdf;
 $("#t").onkeydown = e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); $("#f").requestSubmit(); } };
 function bulle(cls, txt) { const m = document.createElement("div"); m.className = "m " + cls; m.textContent = txt; $("#msgs").append(m); $("#msgs").scrollTop = 1e9; return m; }
 $("#f").onsubmit = async e => {
   e.preventDefault(); const q = $("#t").value.trim(); if (!q) return; $("#t").value = ""; bulle("u", q);
-  const att = bulle("a", "Albert consulte le guide…"); $("#msgs").setAttribute("aria-busy", true);
+  const att = bulle("a", "Sage consulte le guide…"); $("#msgs").setAttribute("aria-busy", true);
   try {
     const r = await fetch("/api/guides", {method: "POST", body: JSON.stringify({question: q, doc: view.doc?.id, historique: histo})});
     const j = await r.json(); if (!r.ok) throw new Error(j.erreur || r.status);
@@ -509,13 +519,16 @@ $("#f").onsubmit = async e => {
     att.append(s);
   } catch (err) {
     att.className = "m err";
-    att.textContent = "Albert n'a pas pu répondre : " + err.message;
+    att.textContent = "Sage n'a pas pu répondre : " + err.message;
   }
   $("#msgs").setAttribute("aria-busy", false);
 };
 
 render();
-document.fonts.ready.then(() => render(false)); // accolades recalculées avec la largeur réelle de Marianne
+// Cadrage immédiat à l'ouverture, puis recalcul quand Marianne est chargée (largeur réelle des libellés).
+// Un render(false) ici annulerait l'animation de cadrage en cours et laisserait la caméra à l'origine.
+cam = camAjustee(scene); appliquerCam();
+document.fonts.ready.then(() => { cam = camAjustee(scene); appliquerCam(); render(true); });
 matchMedia("(prefers-color-scheme: dark)").onchange = () => render(false); // couleurs relues dans le thème courant
 </script>
 </body>

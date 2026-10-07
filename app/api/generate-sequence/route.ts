@@ -69,12 +69,13 @@ function determineRegime(
   return "cyclique";
 }
 
-function buildSystemPrompt(
+async function buildSystemPrompt(
   regime: "cyclique" | "ouvert" | "maximal",
   cycle?: string,
   niveau?: string,
-  domaine?: string
-): string {
+  domaine?: string,
+  competence?: string
+): Promise<string> {
   const regimeDescriptions = {
     cyclique: {
       justification: "séquence de consolidation ou d'entraînement",
@@ -109,7 +110,7 @@ function buildSystemPrompt(
 
   const referencesContext =
     cycle && niveau && domaine
-      ? buildReferencesContext(cycle, niveau, domaine, "sequence")
+      ? await buildReferencesContext(cycle, niveau, domaine, "sequence", competence)
       : "";
 
   return `<role>
@@ -218,7 +219,7 @@ export async function POST(request: NextRequest) {
   }
 
   const regime = determineRegime(typeSequence ?? "introduction");
-  const systemPrompt = buildSystemPrompt(regime, contexte.cycle, contexte.niveau, contexte.domaine);
+  const systemPrompt = await buildSystemPrompt(regime, contexte.cycle, contexte.niveau, contexte.domaine, contexte.competence);
   const prompt = buildPrompt(contexte, regime) + consigneMultiNiveaux(body.niveauxClasse);
 
   function parseSequence(texte: string) {

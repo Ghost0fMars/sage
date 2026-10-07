@@ -116,7 +116,8 @@ C'est le mode d'usage visé : un enseignant installe SAGE comme une application 
 ### Construire l'installateur
 
 1. Créer `.env.electron` à la racine (à partir de `.env.electron.example`) avec la clé `ALBERT_API_KEY` à embarquer dans l'application distribuée — **une seule clé partagée par tous les enseignants qui installeront ce build**, jamais demandée à l'utilisateur.
-2. Lancer la commande correspondant à la plateforme cible :
+2. Indexer les textes officiels : PDF dans `public/carte/référentiels/` (non versionnés), puis `npm run index-corpus` (Python + `pip install pymupdf`). L'index (`public/carte/data/`) alimente la Carte des guides, l'assistant et la génération ; à relancer après tout ajout ou modification de PDF.
+3. Lancer la commande correspondant à la plateforme cible :
 
    ```bash
    npm run electron:dist:win     # Windows (.exe, NSIS)
@@ -153,6 +154,9 @@ app/
   lib/user-storage.ts           Lecture / écriture locale par utilisateur
   layout.tsx                    Structure globale de l'application
   globals.css                   Styles globaux + Tailwind
+  lib/corpus.ts                 Recherche dans les textes officiels (carte, assistant, génération)
+public/carte/                   Carte des guides : page, PDF (référentiels/) et index (data/)
+scripts/build_index.py          Indexation des PDF (npm run index-corpus)
 electron/                       Empaquetage application de bureau
 supabase/                       Schéma de base de données
 Référentiel_de_compétences.json Données du référentiel (issu de l'ancien Excel)

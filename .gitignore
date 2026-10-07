@@ -11,6 +11,11 @@ pnpm-debug.log*
 .claude/
 tsconfig.tsbuildinfo
 
+# Corpus des référentiels : PDF (non versionnés) et index généré par npm run index-corpus
+public/carte/référentiels/
+public/carte/data/
+__pycache__/
+
 # Electron build output
 dist-electron/
 

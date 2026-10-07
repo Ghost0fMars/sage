@@ -25,6 +25,14 @@ if (!existsSync(electronEnvPath)) {
   process.exit(1)
 }
 
+if (!existsSync(join(root, 'public', 'carte', 'data', 'index.json'))) {
+  console.error(
+    '❌ Corpus des référentiels non indexé (public/carte/data/index.json absent).\n' +
+    '   PDF dans public/carte/référentiels/, puis : npm run index-corpus (Python + pymupdf).'
+  )
+  process.exit(1)
+}
+
 console.log('▶ next build (mode local — Supabase désactivé)...')
 execSync('npx next build', {
   stdio: 'inherit',

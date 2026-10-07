@@ -152,11 +152,12 @@ export async function POST(request: Request) {
     );
   }
 
-  const referencesContext = buildReferencesContext(
+  const referencesContext = await buildReferencesContext(
     contexte.cycle ?? "",
     contexte.niveau,
     contexte.domaine,
-    "lesson"
+    "lesson",
+    contexte.competence
   );
   const systemPrompt = SYSTEM_PROMPT + referencesContext;
   const prompt = buildPrompt(contexte) + consigneMultiNiveaux(body.niveauxClasse);

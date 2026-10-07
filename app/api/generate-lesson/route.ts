@@ -68,8 +68,8 @@ function seanceValide(seance: SeanceDetaillee) {
   );
 }
 
-function buildLessonSystemPrompt(cycle: string, niveau: string, domaine: string): string {
-  const referencesContext = buildReferencesContext(cycle, niveau, domaine, "lesson");
+async function buildLessonSystemPrompt(cycle: string, niveau: string, domaine: string, competence = ""): Promise<string> {
+  const referencesContext = await buildReferencesContext(cycle, niveau, domaine, "lesson", competence);
   return SYSTEM_PROMPT_BASE + referencesContext;
 }
 
@@ -199,7 +199,7 @@ export async function POST(request: Request) {
     );
   }
 
-  const systemPrompt = buildLessonSystemPrompt(contexte.cycle, contexte.niveau, contexte.domaine);
+  const systemPrompt = await buildLessonSystemPrompt(contexte.cycle, contexte.niveau, contexte.domaine, contexte.competence);
   const prompt = buildPrompt(contexte) + consigneMultiNiveaux(body.niveauxClasse);
 
   function parseSeance(texte: string) {

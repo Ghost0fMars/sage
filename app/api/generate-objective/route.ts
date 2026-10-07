@@ -37,11 +37,12 @@ export async function POST(request: Request) {
     );
   }
 
-  const referencesContext = buildReferencesContext(
+  const referencesContext = await buildReferencesContext(
     contexte.cycle ?? "",
     contexte.niveau ?? "",
     contexte.domaine ?? "",
-    "objective"
+    "objective",
+    contexte.competence
   );
 
   const systemPromptWithRefs = referencesContext

@@ -58,6 +58,15 @@ const icons = {
       <path d="M3 19c0-4 3.1-7 7-7s7 3 7 7" />
     </svg>
   ),
+  map: (
+    <svg {...iconProps}>
+      <circle cx="10" cy="10" r="2.5" />
+      <circle cx="4" cy="4" r="1.5" />
+      <circle cx="16" cy="5" r="1.5" />
+      <circle cx="15" cy="16" r="1.5" />
+      <path d="M8.2 8.2L5.1 5.1M12.2 8.9l2.5-2.8M11.7 11.9l2.3 3" />
+    </svg>
+  ),
   sliders: (
     <svg {...iconProps}>
       <path d="M2 5h16M2 10h16M2 15h16" />
@@ -89,6 +98,7 @@ const navigation: { href: string; label: string; icon: React.ReactNode }[] = [
   { href: "/bibliotheque", label: "Bibliothèque", icon: icons.books },
   { href: "/progression", label: "Progression", icon: icons.chart },
   { href: "/eleves", label: "Élèves & suivi", icon: icons.person },
+  { href: "/carte", label: "Carte des guides", icon: icons.map },
   { href: "/parametres", label: "Paramètres", icon: icons.sliders }
 ];
 

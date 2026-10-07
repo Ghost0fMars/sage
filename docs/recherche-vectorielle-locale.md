@@ -3,7 +3,27 @@
 Notes pour reprendre plus tard le remplacement de Supabase/pgvector par un index
 local pour la « documentation institutionnelle » de l'assistant.
 
-État au 6 octobre 2026 : **rien n'est implémenté**, ce document décrit le plan.
+État au 7 octobre 2026 : **Supabase/pgvector est retiré, et la recherche vectorielle a été
+essayée puis écartée.** Assistant, Carte des guides et génération cherchent tous dans un
+corpus unique (`app/lib/corpus.ts`, index `public/carte/data/` produit par
+`npm run index-corpus`) : blocs de ~1 200 caractères, 20 candidats par mots-clés (TF-IDF),
+puis reclassement par le reranker d'Albert (`bge-reranker-v2-m3`).
+
+Banc d'essai (12 compétences réelles CP–CM2, 2 passages par famille de textes, Albert note
+chaque passage 0/1/2 pour préparer la séance, moyenne de deux passes) :
+
+| Méthode | Note /2 | Passages « directement utiles » |
+|---|---|---|
+| Mots-clés seuls | 1,22 | 48 % |
+| Vecteurs `bge-m3` seuls (un vecteur par bloc) | 1,06 | 37 % |
+| Hybride (mots-clés + vecteurs, fusion des rangs) | 1,22 | 46 % |
+| **Mots-clés + reranker** (retenu) | **1,47** | **57 %** |
+| Hybride + reranker | 1,42 | 55 % |
+
+Les vecteurs n'apportent rien une fois le reranker en place : pas d'index vectoriel à
+maintenir. Le score du reranker ne permet pas non plus de seuil (des passages jugés utiles
+ont des scores aussi bas que des passages hors sujet). Le reste de ce document décrit
+l'ancien système et le plan initial, conservés pour mémoire.
 
 ---
 

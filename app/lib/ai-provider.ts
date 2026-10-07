@@ -1,6 +1,5 @@
 const ALBERT_BASE_URL = "https://albert.api.etalab.gouv.fr/v1";
 const ALBERT_CHAT_MODEL = process.env.ALBERT_MODEL || "deepseek-v4-flash";
-const ALBERT_EMBEDDING_MODEL = "bge-m3";
 
 function getAlbertApiKey(): string {
   const apiKey = process.env.ALBERT_API_KEY;
@@ -48,25 +47,25 @@ export async function callAlbert(
   return data.choices?.[0]?.message?.content?.trim() ?? "";
 }
 
-type AlbertEmbeddingResponse = {
-  data?: { embedding?: number[] }[];
-};
-
-export async function callAlbertEmbedding(text: string): Promise<number[] | null> {
-  const apiKey = process.env.ALBERT_API_KEY;
-  if (!apiKey) return null;
-
-  const response = await fetch(`${ALBERT_BASE_URL}/embeddings`, {
+async function postAlbert<T>(chemin: string, corps: object, delai = 15000): Promise<T> {
+  const response = await fetch(`${ALBERT_BASE_URL}${chemin}`, {
     method: "POST",
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({ model: ALBERT_EMBEDDING_MODEL, input: text })
+    headers: { Authorization: `Bearer ${getAlbertApiKey()}`, "Content-Type": "application/json" },
+    body: JSON.stringify(corps),
+    signal: AbortSignal.timeout(delai)
   });
+  if (!response.ok) throw new Error(`Erreur Albert IA (${response.status}) : ${(await response.text()).slice(0, 300)}`);
+  return (await response.json()) as T;
+}
 
-  if (!response.ok) return null;
-
-  const data = (await response.json()) as AlbertEmbeddingResponse;
-  return data.data?.[0]?.embedding ?? null;
+// Scores de pertinence de chaque document pour la requête, dans l'ordre des documents.
+export async function callAlbertRerank(query: string, documents: string[]): Promise<number[]> {
+  const data = await postAlbert<{ results: { index: number; relevance_score: number }[] }>("/rerank", {
+    model: "bge-reranker-v2-m3",
+    query,
+    documents
+  });
+  const scores = new Array<number>(documents.length).fill(0);
+  for (const r of data.results) scores[r.index] = r.relevance_score;
+  return scores;
 }

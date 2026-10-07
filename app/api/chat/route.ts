@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
-import { callAlbert, callAlbertEmbedding } from "../../lib/ai-provider";
+import { callAlbert } from "../../lib/ai-provider";
+import { citer, lienPdf, rechercher, type Passage } from "../../lib/corpus";
 
 type Message = {
   role: "user" | "assistant";
@@ -10,11 +11,6 @@ type Message = {
 type ChatRequest = {
   messages: Message[];
   context: string;
-};
-
-type DocumentChunk = {
-  content: string;
-  similarity: number;
 };
 
 function getBearerToken(request: NextRequest) {
@@ -61,32 +57,9 @@ async function verifierUtilisateur(request: NextRequest) {
   return { user: data.user } as const;
 }
 
-async function rechercherDocumentation(question: string): Promise<string> {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-
-  if (!supabaseUrl || !supabaseServiceKey) {
-    return "";
-  }
-
-  const embedding = await callAlbertEmbedding(question);
-
-  if (!embedding) {
-    return "";
-  }
-
-  const supabase = createClient(supabaseUrl, supabaseServiceKey);
-  const { data: chunks, error } = await supabase.rpc("match_document_chunks", {
-    query_embedding: embedding,
-    match_count: 6,
-    match_threshold: 0.45
-  });
-
-  if (error || !chunks || (chunks as DocumentChunk[]).length === 0) {
-    return "";
-  }
-
-  return (chunks as DocumentChunk[]).map((chunk) => chunk.content).join("\n\n---\n\n");
+async function rechercherDocumentation(question: string): Promise<Passage[]> {
+  // corpus absent (non indexé) : l'assistant répond sans documentation
+  return rechercher(question, { k: 4 }).catch(() => []);
 }
 
 function buildSystemPrompt(context: string, docContext: string) {
@@ -102,7 +75,7 @@ function buildSystemPrompt(context: string, docContext: string) {
 ${context}
 ${
     docContext
-      ? `\n[DOCUMENTATION INSTITUTIONNELLE PERTINENTE]\n${docContext}\n\nAppuie-toi sur cette documentation pour enrichir tes réponses. Cite les sources ou indique qu'il s'agit de recommandations institutionnelles quand tu t'y réfères.`
+      ? `\n[DOCUMENTATION INSTITUTIONNELLE PERTINENTE]\n${docContext}\n\nAppuie-toi sur cette documentation pour enrichir tes réponses. Quand tu t'y réfères, cite la source sous la forme [Titre, p. N]. Ignore les extraits sans rapport avec la question.`
       : ""
   }
 
@@ -145,7 +118,8 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: auth.error }, { status: auth.status });
   }
 
-  const docContext = await rechercherDocumentation(dernierMessage).catch(() => "");
+  const passages = await rechercherDocumentation(dernierMessage);
+  const docContext = passages.map((p) => citer(p, 1200)).join("\n\n---\n\n");
   const instructions = buildSystemPrompt(context, docContext);
 
   try {
@@ -158,7 +132,11 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    return NextResponse.json({ content });
+    // Seulement les sources que la réponse cite : les autres extraits étaient hors sujet.
+    const sources = passages
+      .filter((p) => content.includes(p.titre))
+      .map((p) => ({ titre: p.titre, page: p.page, lien: lienPdf(p) }));
+    return NextResponse.json({ content, sources });
   } catch (error) {
     return NextResponse.json(
       { error: error instanceof Error ? error.message : "Erreur lors de l'appel à l'IA." },

@@ -7,6 +7,7 @@ import { readUserData } from "../lib/user-storage";
 type Message = {
   role: "user" | "assistant";
   content: string;
+  sources?: { titre: string; page: number; lien: string }[];
 };
 
 type Eleve = {
@@ -200,7 +201,7 @@ export default function AssistantChat() {
         })
       });
 
-      const result = (await response.json()) as { content?: string; error?: string };
+      const result = (await response.json()) as { content?: string; error?: string; sources?: Message["sources"] };
 
       if (!response.ok || !result.content) {
         throw new Error(result.error ?? "Erreur de l'API");
@@ -208,7 +209,7 @@ export default function AssistantChat() {
 
       setMessages((previous) => [
         ...previous.slice(0, -1),
-        { role: "assistant", content: result.content! }
+        { role: "assistant", content: result.content!, sources: result.sources }
       ]);
     } catch (error) {
       const message = error instanceof Error ? error.message : "Une erreur est survenue.";
@@ -390,7 +391,25 @@ export default function AssistantChat() {
                             ))}
                           </span>
                         ) : (
-                          <span className="whitespace-pre-wrap">{message.content}</span>
+                          <>
+                            <span className="whitespace-pre-wrap">{message.content}</span>
+                            {message.sources && message.sources.length > 0 && (
+                              <span className="mt-2 flex flex-wrap gap-1.5">
+                                {message.sources.map((s) => (
+                                  <a
+                                    key={s.lien}
+                                    href={s.lien}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    title={`${s.titre}, page ${s.page}`}
+                                    className="rounded-md border border-slate-300 bg-white px-1.5 py-0.5 text-xs text-slate-600 hover:border-teal-600 hover:text-teal-700"
+                                  >
+                                    {s.titre.length > 28 ? s.titre.slice(0, 27) + "…" : s.titre} p. {s.page}
+                                  </a>
+                                ))}
+                              </span>
+                            )}
+                          </>
                         )}
                       </div>
                     </div>

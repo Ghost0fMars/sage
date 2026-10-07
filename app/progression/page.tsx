@@ -266,7 +266,7 @@ export default function ProgressionPage() {
                 <select
                   value={nouvelleEvaluation.sequenceId}
                   onChange={(event) => choisirSequence(event.target.value)}
-                  className="w-full min-w-0 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-teal-600 focus:ring-2 focus:ring-focus"
+                  className="w-full min-w-0 rounded-md border border-slate-300 bg-white px-3 py-2 text-base outline-none focus:border-teal-600 focus:ring-2 focus:ring-focus"
                 >
                   <option value="">Saisie libre</option>
                   {sequences.map((sequence) => (
@@ -367,7 +367,7 @@ export default function ProgressionPage() {
               </button>
 
               {eleves.length === 0 && (
-                <p className="rounded-md bg-amber-50 p-3 text-sm leading-6 text-amber-950">
+                <p className="rounded-md bg-amber-50 p-3 text-base leading-6 text-amber-950">
                   Ajoutez d'abord des élèves pour créer une évaluation.
                 </p>
               )}
@@ -376,7 +376,7 @@ export default function ProgressionPage() {
             <h2 className="mt-8 text-xl font-bold text-slate-950">Évaluations</h2>
             <div className="mt-4 grid gap-2">
               {evaluations.length === 0 && (
-                <p className="rounded-md bg-slate-100 p-3 text-sm text-slate-700">
+                <p className="rounded-md bg-slate-100 p-3 text-base text-slate-700">
                   Aucune évaluation pour le moment.
                 </p>
               )}
@@ -416,7 +416,7 @@ export default function ProgressionPage() {
                       {evaluationSelectionnee.titre}
                     </h2>
                     {evaluationSelectionnee.domaine && (
-                      <p className="mt-2 text-sm text-slate-600">
+                      <p className="mt-2 text-base text-slate-600">
                         {evaluationSelectionnee.domaine}
                       </p>
                     )}

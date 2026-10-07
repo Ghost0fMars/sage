@@ -310,7 +310,7 @@ export default function TableauDeBord() {
           <article className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
             <p className="text-sm font-semibold text-slate-600">Progression du programme</p>
             <p className="mt-3 text-3xl font-bold text-slate-950">{progression}%</p>
-            <p className="mt-1 text-sm text-slate-600">Préparations enregistrées</p>
+            <p className="mt-1 text-base text-slate-600">Préparations enregistrées</p>
             <div className="mt-5 h-2 rounded-full bg-slate-100">
               <div className="h-2 rounded-full bg-teal-500" style={{ width: `${progression}%` }} />
             </div>
@@ -323,7 +323,7 @@ export default function TableauDeBord() {
               <div>
                 <h2 className="text-xl font-bold">Cahier journal</h2>
                 {dateCahierJournal && (
-                  <p className="mt-1 text-sm text-slate-600">
+                  <p className="mt-1 text-base text-slate-600">
                     {formatDateLongue(dateCahierJournal)}
                   </p>
                 )}
@@ -332,7 +332,7 @@ export default function TableauDeBord() {
                 <select
                   value={dateCahierJournal}
                   onChange={(event) => setDateCahierJournal(event.target.value)}
-                  className="rounded-md border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-teal-600 focus:ring-2 focus:ring-focus"
+                  className="rounded-md border border-slate-300 bg-white px-3 py-2 text-base outline-none focus:border-teal-600 focus:ring-2 focus:ring-focus"
                 >
                   {datesDisponibles.length === 0 && <option value="">Aucune date</option>}
                   {datesDisponibles.map((date) => (
@@ -352,7 +352,7 @@ export default function TableauDeBord() {
 
             <div className="mt-5 grid gap-3 md:grid-cols-2">
               {seancesDuJour.length === 0 && (
-                <p className="rounded-md bg-slate-100 p-4 text-sm text-slate-600">
+                <p className="rounded-md bg-slate-100 p-4 text-base text-slate-600">
                   Aucune séance prévue à cette date.
                 </p>
               )}
@@ -371,7 +371,7 @@ export default function TableauDeBord() {
                     {tuile.day} · {formatHeure(tuile.startMinute)}
                   </p>
                   <h3 className="mt-2 font-bold">{tuile.titreSequence}</h3>
-                  <p className="mt-1 text-sm opacity-80">
+                  <p className="mt-1 text-base opacity-80">
                     Séance {tuile.seanceLabel} · {tuile.dureeMinutes} min · {tuile.domaine}
                   </p>
                 </article>
@@ -395,7 +395,7 @@ export default function TableauDeBord() {
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
               <h2 className="text-xl font-bold">Agenda</h2>
-              <p className="mt-1 text-sm text-slate-600">
+              <p className="mt-1 text-base text-slate-600">
                 {moisAgenda ? formatMois(moisAgenda) : "Choisir une date"}
               </p>
             </div>
@@ -404,7 +404,7 @@ export default function TableauDeBord() {
                 type="date"
                 value={dateAgenda}
                 onChange={(event) => setDateAgenda(event.target.value)}
-                className="rounded-md border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-teal-600 focus:ring-2 focus:ring-focus"
+                className="rounded-md border border-slate-300 bg-white px-3 py-2 text-base outline-none focus:border-teal-600 focus:ring-2 focus:ring-focus"
               />
               <button
                 type="button"
@@ -469,7 +469,7 @@ export default function TableauDeBord() {
 
           <div className="mt-4 grid gap-3">
             {evenementsParJour.length === 0 && (
-              <p className="rounded-md bg-slate-50 p-3 text-sm text-slate-600">
+              <p className="rounded-md bg-slate-50 p-3 text-base text-slate-600">
                 Aucun évènement ce mois-ci.
               </p>
             )}
@@ -490,7 +490,7 @@ export default function TableauDeBord() {
                         </p>
                         <h4 className="font-bold text-slate-950">{evenement.title}</h4>
                         {evenement.notes && (
-                          <p className="mt-1 text-sm text-slate-600">{evenement.notes}</p>
+                          <p className="mt-1 text-base text-slate-600">{evenement.notes}</p>
                         )}
                       </div>
                       <button

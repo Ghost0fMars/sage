@@ -192,7 +192,7 @@ export default function ParametresPage() {
           className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm"
         >
           <h2 className="text-xl font-bold text-slate-950">Informations personnelles</h2>
-          <p className="mt-1 text-sm text-slate-500">
+          <p className="mt-1 text-base text-slate-500">
             Stockées uniquement sur votre ordinateur.
           </p>
 
@@ -202,7 +202,7 @@ export default function ParametresPage() {
               <input
                 value={form.firstName}
                 onChange={(event) => updateField("firstName", event.target.value)}
-                className="rounded-md border border-slate-300 px-3 py-3 text-sm outline-none focus:border-teal-600 focus:ring-2 focus:ring-focus"
+                className="rounded-md border border-slate-300 px-3 py-3 text-base outline-none focus:border-teal-600 focus:ring-2 focus:ring-focus"
                 placeholder="Prénom"
               />
             </label>
@@ -212,7 +212,7 @@ export default function ParametresPage() {
               <input
                 value={form.lastName}
                 onChange={(event) => updateField("lastName", event.target.value)}
-                className="rounded-md border border-slate-300 px-3 py-3 text-sm outline-none focus:border-teal-600 focus:ring-2 focus:ring-focus"
+                className="rounded-md border border-slate-300 px-3 py-3 text-base outline-none focus:border-teal-600 focus:ring-2 focus:ring-focus"
                 placeholder="Nom"
               />
             </label>
@@ -222,14 +222,14 @@ export default function ParametresPage() {
               <input
                 value={form.school}
                 onChange={(event) => updateField("school", event.target.value)}
-                className="rounded-md border border-slate-300 px-3 py-3 text-sm outline-none focus:border-teal-600 focus:ring-2 focus:ring-focus"
+                className="rounded-md border border-slate-300 px-3 py-3 text-base outline-none focus:border-teal-600 focus:ring-2 focus:ring-focus"
                 placeholder="Nom de l'école ou de l'établissement"
               />
             </label>
           </div>
 
           {message && (
-            <p className="mt-4 rounded-md bg-slate-100 p-3 text-sm text-slate-700">{message}</p>
+            <p className="mt-4 rounded-md bg-slate-100 p-3 text-base text-slate-700">{message}</p>
           )}
 
           <div className="mt-5 flex flex-wrap gap-3">
@@ -343,7 +343,7 @@ export default function ParametresPage() {
             <div className="mt-5 flex flex-wrap items-center justify-between gap-3 rounded-md border border-slate-200 bg-slate-50 p-4">
               <div className="min-w-0">
                 <p className="truncate font-semibold text-slate-950">{reglement.nom}</p>
-                <p className="mt-0.5 text-sm text-slate-500">
+                <p className="mt-0.5 text-base text-slate-500">
                   {formaterTaille(reglement.tailleOctets)} · importé le{" "}
                   {new Date(reglement.importeLe).toLocaleDateString("fr-FR", {
                     day: "numeric",
@@ -406,7 +406,7 @@ export default function ParametresPage() {
           )}
 
           {reglementErreur && (
-            <p className="mt-3 rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-900">
+            <p className="mt-3 rounded-md border border-red-200 bg-red-50 p-3 text-base text-red-900">
               {reglementErreur}
             </p>
           )}

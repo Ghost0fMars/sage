@@ -1005,7 +1005,7 @@ export default function PagePreparation() {
                 onChange={(e) => setPromptLibre(e.target.value)}
                 placeholder="Ex. : Prépare une séquence sur l'alimentation et la santé pour une classe de CM2 en 5 séances."
                 rows={4}
-                className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm leading-7 text-slate-950 shadow-sm outline-none transition focus:border-teal-600 focus:ring-2 focus:ring-focus"
+                className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-base leading-7 text-slate-950 shadow-sm outline-none transition focus:border-teal-600 focus:ring-2 focus:ring-focus"
               />
             </label>
             {erreur && (
@@ -1042,7 +1042,7 @@ export default function PagePreparation() {
                       value={selection[etape.id]}
                       disabled={etape.disabled}
                       onChange={(e) => changerSelection(etape.id, e.target.value)}
-                      className="min-h-11 w-full min-w-0 max-w-full truncate rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-950 shadow-sm outline-none transition focus:border-teal-600 focus:ring-2 focus:ring-focus disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-500"
+                      className="min-h-11 w-full min-w-0 max-w-full truncate rounded-md border border-slate-300 bg-white px-3 py-2 text-base text-slate-950 shadow-sm outline-none transition focus:border-teal-600 focus:ring-2 focus:ring-focus disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-500"
                     >
                       <option value="">Sélectionner...</option>
                       {etape.options.map((option) => (
@@ -1226,7 +1226,7 @@ export default function PagePreparation() {
                   </dl>
 
                   {!seance.est_seance_cloture && seance.tension_ouverte && (
-                    <p className="mt-3 rounded-md bg-blue-50 px-3 py-2 text-sm text-blue-900">
+                    <p className="mt-3 rounded-md bg-blue-50 px-3 py-2 text-base text-blue-900">
                       <span className="font-semibold">Tension ouverte : </span>
                       {seance.tension_ouverte}
                     </p>
@@ -1280,7 +1280,7 @@ export default function PagePreparation() {
             actions={
               <>
                 {messagePlanning && (
-                  <p className="w-full text-sm text-teal-700">{messagePlanning}</p>
+                  <p className="w-full text-base text-teal-700">{messagePlanning}</p>
                 )}
                 <button
                   type="button"

@@ -145,7 +145,7 @@ export default function AuthPage() {
         </p>
 
         {!supabaseConfigured && (
-          <p className="mt-4 rounded-md border border-amber-200 bg-amber-50 p-3 text-sm text-amber-950">
+          <p className="mt-4 rounded-md border border-amber-200 bg-amber-50 p-3 text-base text-amber-950">
             Ajoutez `NEXT_PUBLIC_SUPABASE_URL` et `NEXT_PUBLIC_SUPABASE_ANON_KEY` dans Vercel et dans `.env.local` pour activer la connexion.
           </p>
         )}
@@ -157,7 +157,7 @@ export default function AuthPage() {
               <input
                 value={name}
                 onChange={(event) => setName(event.target.value)}
-                className="rounded-md border border-slate-300 px-3 py-3 text-sm outline-none focus:border-teal-600 focus:ring-2 focus:ring-focus"
+                className="rounded-md border border-slate-300 px-3 py-3 text-base outline-none focus:border-teal-600 focus:ring-2 focus:ring-focus"
                 placeholder="Prénom ou nom d'enseignant"
               />
             </label>
@@ -170,7 +170,7 @@ export default function AuthPage() {
               value={email}
               onChange={(event) => setEmail(event.target.value)}
               required
-              className="rounded-md border border-slate-300 px-3 py-3 text-sm outline-none focus:border-teal-600 focus:ring-2 focus:ring-focus"
+              className="rounded-md border border-slate-300 px-3 py-3 text-base outline-none focus:border-teal-600 focus:ring-2 focus:ring-focus"
               placeholder="enseignant@example.com"
             />
           </label>
@@ -183,13 +183,13 @@ export default function AuthPage() {
               onChange={(event) => setPassword(event.target.value)}
               required
               minLength={6}
-              className="rounded-md border border-slate-300 px-3 py-3 text-sm outline-none focus:border-teal-600 focus:ring-2 focus:ring-focus"
+              className="rounded-md border border-slate-300 px-3 py-3 text-base outline-none focus:border-teal-600 focus:ring-2 focus:ring-focus"
               placeholder="6 caractères minimum"
             />
           </label>
 
           {message && (
-            <p className="rounded-md bg-slate-100 p-3 text-sm text-slate-700">{message}</p>
+            <p className="rounded-md bg-slate-100 p-3 text-base text-slate-700">{message}</p>
           )}
 
           <button

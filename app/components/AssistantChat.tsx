@@ -430,7 +430,7 @@ export default function AssistantChat() {
                 placeholder="Posez une question..."
                 rows={1}
                 disabled={streaming}
-                className="flex-1 resize-none rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-800 placeholder-slate-400 transition focus:border-teal-400 focus:outline-none focus:ring-1 focus:ring-teal-400 disabled:opacity-50"
+                className="flex-1 resize-none rounded-xl border border-slate-200 px-3 py-2 text-base text-slate-800 placeholder-slate-400 transition focus:border-teal-400 focus:outline-none focus:ring-1 focus:ring-teal-400 disabled:opacity-50"
                 style={{ minHeight: "40px", maxHeight: "128px" }}
               />
               <button

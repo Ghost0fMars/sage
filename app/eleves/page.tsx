@@ -374,7 +374,7 @@ export default function ElevesPage() {
               <select
                 value={classeFiltreId}
                 onChange={(event) => setClasseFiltreId(event.target.value)}
-                className="rounded-md border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-teal-600 focus:ring-2 focus:ring-focus"
+                className="rounded-md border border-slate-300 bg-white px-3 py-2 text-base outline-none focus:border-teal-600 focus:ring-2 focus:ring-focus"
               >
                 <option value="">Toutes les classes</option>
                 {classes.map((classe) => (
@@ -391,7 +391,7 @@ export default function ElevesPage() {
               value={filtre}
               onChange={(event) => setFiltre(event.target.value)}
               placeholder="Nom, prénom, groupe, note..."
-              className="rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:border-teal-600 focus:ring-2 focus:ring-focus"
+              className="rounded-md border border-slate-300 px-3 py-2 text-base outline-none focus:border-teal-600 focus:ring-2 focus:ring-focus"
             />
           </label>
         </div>
@@ -593,7 +593,7 @@ export default function ElevesPage() {
                   <h2 className="mt-1 text-2xl font-bold text-slate-950">
                     {eleveOuvert.nom} {eleveOuvert.prenom}
                   </h2>
-                  <p className="mt-1 text-sm text-slate-600">
+                  <p className="mt-1 text-base text-slate-600">
                     {eleveOuvert.naissance || "Date de naissance non renseignée"} · Groupe{" "}
                     {eleveOuvert.groupe || "-"}
                   </p>
@@ -702,7 +702,7 @@ export default function ElevesPage() {
 
                       <div className="grid gap-2 content-start">
                         {progressionEleve.length === 0 && (
-                          <p className="rounded-md bg-slate-100 p-3 text-sm text-slate-700">
+                          <p className="rounded-md bg-slate-100 p-3 text-base text-slate-700">
                             Aucune évaluation renseignée pour cet élève.
                           </p>
                         )}
@@ -731,7 +731,7 @@ export default function ElevesPage() {
                         value={nouvelleNote}
                         onChange={(event) => setNouvelleNote(event.target.value)}
                         placeholder="Incident, observation, échange avec la famille..."
-                        className="min-h-24 resize-y rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:border-teal-600 focus:ring-2 focus:ring-focus"
+                        className="min-h-24 resize-y rounded-md border border-slate-300 px-3 py-2 text-base outline-none focus:border-teal-600 focus:ring-2 focus:ring-focus"
                       />
                       <button
                         type="button"
@@ -744,7 +744,7 @@ export default function ElevesPage() {
 
                     <div className="mt-4 grid gap-3">
                       {notesEleveOuvert.length === 0 && (
-                        <p className="rounded-md bg-slate-100 p-3 text-sm text-slate-700">
+                        <p className="rounded-md bg-slate-100 p-3 text-base text-slate-700">
                           Aucune note enregistrée pour cet élève.
                         </p>
                       )}
@@ -753,7 +753,7 @@ export default function ElevesPage() {
                           <p className="text-xs font-semibold text-slate-500">
                             {new Date(note.date).toLocaleDateString("fr-FR")}
                           </p>
-                          <p className="mt-2 text-sm leading-6 text-slate-800">{note.texte}</p>
+                          <p className="mt-2 text-base leading-6 text-slate-800">{note.texte}</p>
                         </article>
                       ))}
                     </div>

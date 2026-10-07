@@ -669,7 +669,7 @@ export default function BibliothequePage() {
                 <select
                   value={classeFiltreId}
                   onChange={(event) => setClasseFiltreId(event.target.value)}
-                  className="rounded-md border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-teal-600 focus:ring-2 focus:ring-focus"
+                  className="rounded-md border border-slate-300 bg-white px-3 py-2 text-base outline-none focus:border-teal-600 focus:ring-2 focus:ring-focus"
                 >
                   <option value="">Toutes mes classes</option>
                   {classes.map((classe) => (
@@ -788,7 +788,7 @@ export default function BibliothequePage() {
                                     <h2 className="mt-1 text-xl font-bold text-slate-950">
                                       {activite.activity.titre}
                                     </h2>
-                                    <p className="mt-1 text-sm text-slate-500">
+                                    <p className="mt-1 text-base text-slate-500">
                                       {activite.sousDomaine}
                                     </p>
                                   </div>
@@ -912,7 +912,7 @@ export default function BibliothequePage() {
                                     <h2 className="mt-1 text-xl font-bold text-slate-950">
                                       {item.course.titre}
                                     </h2>
-                                    <p className="mt-1 text-sm text-slate-500">
+                                    <p className="mt-1 text-base text-slate-500">
                                       {item.sousDomaine}
                                     </p>
                                   </div>
@@ -1073,7 +1073,7 @@ export default function BibliothequePage() {
                                     className="min-h-20 w-full rounded-md border border-slate-300 bg-white px-3 py-2 outline-none focus:border-teal-600 focus:ring-2 focus:ring-focus"
                                   />
                                 </label>
-                                <p className="mt-2 text-sm leading-6 text-slate-700">
+                                <p className="mt-2 text-base leading-6 text-slate-700">
                                   <span className="font-semibold text-slate-950">Objectif :</span>{" "}
                                   {sequence.objectif}
                                 </p>

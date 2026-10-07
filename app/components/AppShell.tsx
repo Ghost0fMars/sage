@@ -181,20 +181,6 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
             </a>
           );
         })}
-
-        {supabaseConfigured && !cloudEmail && (
-          <a
-            href="/auth"
-            className={`flex min-h-11 items-center gap-3 rounded-md px-3 py-3 text-sm font-semibold transition ${
-              pathname === "/auth"
-                ? "rounded-l-none bg-bleu-france-mist text-bleu-france shadow-[inset_3px_0_0_#000091]"
-                : "text-slate-700 hover:bg-slate-50 hover:text-slate-950"
-            }`}
-          >
-            <span className="flex w-5 items-center justify-center">{icons.login}</span>
-            Connexion
-          </a>
-        )}
       </nav>
 
       <div className="mt-auto grid gap-4 pt-8">

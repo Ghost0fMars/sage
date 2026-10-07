@@ -627,8 +627,8 @@ export default function PlanningPage() {
                           onFocus={() => setTuileSelectionneeId(tuile.id)}
                           onKeyDown={(event) => gererClavierTuile(event, tuile)}
                           onDragStart={(event) => commencerGlisser(event, tuile.id, true)}
-                          className={`absolute left-1 right-1 cursor-move overflow-hidden rounded-md border p-1.5 text-white shadow-sm outline-none focus-visible:ring-4 focus-visible:ring-teal-300 ${
-                            tuileSelectionneeId === tuile.id ? "ring-2 ring-slate-950" : ""
+                          className={`absolute left-1 right-1 cursor-move overflow-hidden rounded-md border p-1.5 text-white shadow-sm outline-none ${
+                            tuileSelectionneeId === tuile.id ? "!shadow-[0_8px_20px_rgba(3,32,38,0.45)]" : ""
                           }`}
                           style={{
                             top,
@@ -652,7 +652,7 @@ export default function PlanningPage() {
                             type="button"
                             data-garde-selection
                             onClick={() => setFicheOuverteId(tuile.id)}
-                            className="absolute right-2 z-10 rounded-md bg-white px-2 py-1 text-xs font-semibold text-slate-950 shadow-md ring-1 ring-slate-300 transition hover:bg-slate-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500"
+                            className="absolute right-2 z-10 rounded-md bg-white px-2 py-1 text-xs font-semibold text-slate-950 shadow-md transition hover:bg-slate-100 focus:outline-none"
                             style={{ top: top + 4 }}
                           >
                             Voir la fiche
@@ -689,8 +689,8 @@ export default function PlanningPage() {
                   onClick={() => setTuileSelectionneeId(tuile.id)}
                   onKeyDown={(event) => placerDepuisReserve(event, tuile)}
                   onDragStart={(event) => commencerGlisser(event, tuile.id)}
-                  className={`cursor-move rounded-md outline-none focus-visible:ring-4 focus-visible:ring-teal-300 border border-l-[6px] p-3 text-sm shadow-sm ${
-                    tuileSelectionneeId === tuile.id ? "ring-2 ring-slate-950" : ""
+                  className={`cursor-move rounded-md outline-none border border-l-[6px] p-3 text-sm shadow-sm ${
+                    tuileSelectionneeId === tuile.id ? "!shadow-[0_8px_20px_rgba(3,32,38,0.45)]" : ""
                   }`}
                   style={{
                     backgroundColor: getDisciplineColor(tuile.domaine).softBackground,

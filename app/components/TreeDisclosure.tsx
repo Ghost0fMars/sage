@@ -50,7 +50,7 @@ export default function TreeDisclosure({
       <div
         className={
           contentClassName ??
-          (heading ? "mt-4 grid gap-3 border-l border-slate-200 pl-4" : "mt-2 grid gap-2 border-l border-slate-200 pl-4")
+          (heading ? "mt-4 grid gap-3 pl-4" : "mt-2 grid gap-2 pl-4")
         }
       >
         {children}

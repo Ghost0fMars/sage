@@ -1011,8 +1011,8 @@ export default function BibliothequePage() {
                             {listeSequences.map((sequence) => (
                               <TreeDisclosure
                                 key={sequence.id}
-                                className="rounded-md border bg-white p-4"
-                                style={{ borderColor: getDisciplineColor(sequence.domaine).border }}
+                                className="rounded-lg p-4 shadow-sm"
+                                style={{ backgroundColor: getDisciplineColor(sequence.domaine).softBackground }}
                                 contentClassName="mt-4 grid gap-3"
                                 summary={
                                   <span>
@@ -1079,10 +1079,9 @@ export default function BibliothequePage() {
                                 </p>
 
                                 <details
-                                  className="group mt-4 rounded-md border p-3"
+                                  className="group mt-4 rounded-lg p-3 shadow-sm"
                                   style={{
-                                    backgroundColor: getDisciplineColor(sequence.domaine).softBackground,
-                                    borderColor: getDisciplineColor(sequence.domaine).border,
+                                    backgroundColor: `color-mix(in srgb, ${getDisciplineColor(sequence.domaine).softBackground} 91%, ${getDisciplineColor(sequence.domaine).accent})`,
                                     color: getDisciplineColor(sequence.domaine).text
                                   }}
                                   open
@@ -1118,8 +1117,10 @@ export default function BibliothequePage() {
                                                   return (
                                                     <article
                                                       key={`${sequence.id}-${seance.numero}`}
-                                                      className="rounded-md border bg-white p-4"
-                                                      style={{ borderColor: getDisciplineColor(sequence.domaine).border }}
+                                                      className="rounded-lg p-4 shadow-sm"
+                                                      style={{
+                                                        backgroundColor: `color-mix(in srgb, ${getDisciplineColor(sequence.domaine).softBackground} 82%, ${getDisciplineColor(sequence.domaine).accent})`
+                                                      }}
                                                     >
                                                       <div className="flex flex-wrap items-start justify-between gap-3">
                                                         <div className="min-w-0 flex-1">

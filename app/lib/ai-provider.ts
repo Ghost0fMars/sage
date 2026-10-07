@@ -1,14 +1,29 @@
-const ALBERT_BASE_URL = "https://albert.api.etalab.gouv.fr/v1";
-const ALBERT_CHAT_MODEL = process.env.ALBERT_MODEL || "deepseek-v4-flash";
+import { headers } from "next/headers";
+
+export const ALBERT_BASE_URL = "https://albert.api.etalab.gouv.fr/v1";
+const ALBERT_DEFAULT_MODEL = process.env.ALBERT_MODEL || "deepseek-v4-flash";
+
+// En-têtes envoyés par le navigateur (clé et modèle choisis dans les paramètres).
+function enteteRequete(nom: string): string {
+  try {
+    return headers().get(nom)?.trim() ?? "";
+  } catch {
+    return "";
+  }
+}
 
 function getAlbertApiKey(): string {
-  const apiKey = process.env.ALBERT_API_KEY;
+  const apiKey = enteteRequete("x-albert-key") || process.env.ALBERT_API_KEY;
   if (!apiKey) {
     throw new Error(
-      "Albert IA n'est pas configuré sur le serveur (ALBERT_API_KEY manquante)."
+      "Albert IA n'est pas configuré : saisissez votre clé API dans Paramètres › Assistant IA."
     );
   }
   return apiKey;
+}
+
+function getAlbertModel(): string {
+  return enteteRequete("x-albert-model") || ALBERT_DEFAULT_MODEL;
 }
 
 type AlbertChatResponse = {
@@ -29,7 +44,7 @@ export async function callAlbert(
       "Content-Type": "application/json"
     },
     body: JSON.stringify({
-      model: ALBERT_CHAT_MODEL,
+      model: getAlbertModel(),
       messages: [
         { role: "system", content: system },
         { role: "user", content: prompt }

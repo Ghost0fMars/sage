@@ -56,13 +56,14 @@
 :is(input, select, textarea)[class~="border-slate-300"] {
   background-color: var(--gris-contraste);
   border-color: transparent;
-  border-bottom: 2px solid var(--encre-titre);
+  border-bottom: 1px solid var(--encre-titre);
   border-radius: 6px 6px 0 0;
   color: var(--encre-titre);
 }
 
 :is(input, select, textarea)[class~="border-slate-300"]:focus {
   border-bottom-color: var(--bleu-france);
+  box-shadow: 0 0 0 1px var(--focus);
 }
 
 :is(input, select, textarea)[class~="border-slate-300"]:disabled {

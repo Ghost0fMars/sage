@@ -20,24 +20,24 @@ html,body{margin:0;height:100%;overflow:hidden;background:var(--bg);color:var(--
 #svg{position:fixed;inset:0;width:100%;height:100%;cursor:grab;touch-action:none}
 #svg.drag{cursor:grabbing}
 #gl{position:fixed;inset:0;width:100%;height:100%;cursor:grab;touch-action:none}
-.edge{stroke:var(--line);stroke-width:1.4;fill:none}
-.brace{stroke-width:2;fill:none;stroke-linecap:round;opacity:.75}
+.edge{stroke-width:3;fill:none;stroke-linecap:round;opacity:.85}
+.brace{stroke-width:2.6;fill:none;stroke-linecap:round;stroke-linejoin:round;opacity:.7}
 .node{cursor:pointer}
 .node circle{stroke:var(--card);stroke-width:2.5;transition:r .15s}
-.node:hover circle{stroke:var(--ink)}
-.node.sel circle{stroke:var(--ink);stroke-width:3}
-.node text{fill:var(--ink);font-size:11.5px;paint-order:stroke;stroke:var(--bg);stroke-width:3px;stroke-linejoin:round}
-.node .zone{fill:transparent}
+.node:hover circle:not(.zone){stroke:var(--ink)}
+.node.sel circle:not(.zone){stroke:var(--ink);stroke-width:3}
+.node text{fill:var(--ink);font-size:14px;paint-order:stroke;stroke:var(--bg);stroke-width:3px;stroke-linejoin:round}
+.node circle.zone{fill:transparent;stroke:none}
 .node .chev{stroke:var(--mute);stroke-width:1.5;fill:none;stroke-linecap:round;stroke-linejoin:round}
 .node.dim{opacity:.18}
-.node text.hub{font-size:13px;font-weight:700;text-anchor:middle}
+.node text.hub{font-size:15px;font-weight:700;text-anchor:middle}
 .bar{position:fixed;top:12px;left:12px;display:flex;gap:8px;align-items:flex-start;z-index:5}
 .bar button,.bar input,.panel button{font:inherit;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:6px;padding:7px 12px;box-shadow:var(--shadow)}
 .bar button,.panel button{cursor:pointer}
 .bar button:hover,.panel button:hover{border-color:var(--accent)}
 :focus-visible{outline:2px solid var(--accent);outline-offset:1px}
-.node:focus-visible{outline:none}
-.node:focus-visible circle{stroke:var(--accent);stroke-width:3.5}
+.node:focus,.node:focus-visible,#svg:focus{outline:none}
+.node:focus-visible circle:not(.zone){stroke:var(--accent);stroke-width:3.5}
 .node:focus-visible text{text-decoration:underline;text-decoration-color:var(--accent);text-underline-offset:3px}
 .ic{width:14px;height:14px;stroke:currentColor;stroke-width:1.6;fill:none;stroke-linecap:round;stroke-linejoin:round;vertical-align:-2px}
 .vh{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
@@ -163,14 +163,14 @@ function arbreDocs(docs, cle) {
 
 /* ---------- mise en page : étoile (catégories) puis accolades ---------- */
 const polar = (r, a) => [r * Math.cos(a), r * Math.sin(a)];
-const LIGNE = 24; // hauteur d'une ligne d'accolade
+const LIGNE = 28; // hauteur d'une ligne d'accolade
 const texteNoeud = n => cut(n.label, 40), replie = n => n.kids && !open.has(n.key), CHEV = 10;
 const mesure = document.createElement("canvas").getContext("2d");
 const largeur = t => mesure.measureText(t).width; // largeur réelle du libellé (police fixée dans sceneCarte)
 const haut = n => !n.doc && open.has(n.key) ? Math.max(LIGNE, n.kids.reduce((s, k) => s + haut(k), 0)) : LIGNE;
 
 function sceneCarte() {
-  mesure.font = "11.5px " + css("--font");
+  mesure.font = "14px " + css("--font");
   const nodes = [{key: "root", label: "Index", r: 30, color: css("--accent"), x: 0, y: 0, hub: true}];
   const cats = ORDRE.map(c => ({c, docs: DOCS.filter(d => d.cat === c)})).filter(x => x.docs.length)
     .map(({c, docs}) => ({key: "c:" + c, label: c, n: docs.length, color: css(FAMILLE[c]), kids: arbreDocs(docs, "c:" + c)}));
@@ -179,23 +179,29 @@ function sceneCarte() {
     if (n.doc || !open.has(n.key)) return;
     const dir = o.dir, bord = o.x + dir * (o.r + 6 + largeur(texteNoeud(o)) + 14), sx = bord + dir * 10;
     let y = o.y - n.kids.reduce((s, k) => s + haut(k), 0) / 2;
-    const ys = n.kids.map(k => {
+    const enfants = [], ys = n.kids.map(k => {
       const ky = y + haut(k) / 2; y += haut(k);
       const c = noeud(k, {parent: o.key, x: sx + dir * 16, y: ky, dir, color: o.color, r: k.doc ? 5 : 7, group: !k.doc, lx: sx, ly: ky, tick: true});
-      accolade(k, c); return ky;
+      accolade(k, c); enfants.push(c); return ky;
     });
+    if (ys.length > 1) { // les enfants des extrémités démarrent au bout du crochet, sans dépasser de la courbe
+      const r = Math.min(10, (ys.at(-1) - ys[0]) / 4);
+      enfants[0].lx = enfants.at(-1).lx = sx + dir * r;
+    }
     o.spine = {dir, bord, sx, y0: ys[0], y1: ys.at(-1), py: o.y};
   };
   cats.forEach((c, i) => {
-    const ang = -Math.PI / 2 + i / cats.length * 2 * Math.PI, [x, y] = polar(240, ang);
+    const ang = -Math.PI / 2 + i / cats.length * 2 * Math.PI, [x, y] = polar(165, ang);
     accolade(c, noeud(c, {parent: "root", ang, x, y, dir: Math.cos(ang) < -.01 ? -1 : 1, color: c.color, r: 14, cat: true}));
   });
   return nodes;
 }
-function cheminAccolade({dir, bord, sx, y0, y1, py}) { // trait depuis le libellé + accolade « [ » à extrémités arrondies
-  const k = Math.min(8, (y1 - y0) / 2);
-  return `M${bord},${py}L${sx},${py}` + (y1 - y0 < 1 ? "" :
-    `M${sx + dir * k},${y0}Q${sx},${y0} ${sx},${y0 + k}L${sx},${y1 - k}Q${sx},${y1} ${sx + dir * k},${y1}`);
+function cheminAccolade({dir, bord, sx, y0, y1, py}) { // vraie accolade « { » : crochets arrondis aux extrémités, pointe tournée vers le libellé
+  if (y1 - y0 < 1) return `M${bord},${y0}L${sx},${y0}`;
+  const r = Math.min(10, (y1 - y0) / 4), ym = Math.min(Math.max(py, y0 + 2 * r), y1 - 2 * r), pt = sx - dir * r;
+  return `M${bord},${ym}L${pt},${ym}` +
+    `Q${sx},${ym} ${sx},${ym - r}L${sx},${y0 + r}Q${sx},${y0} ${sx + dir * r},${y0}` +
+    `M${pt},${ym}Q${sx},${ym} ${sx},${ym + r}L${sx},${y1 - r}Q${sx},${y1} ${sx + dir * r},${y1}`;
 }
 
 /* ---------- dessin + animation ---------- */
@@ -221,7 +227,7 @@ function render(fit = true) {
   for (const n of scene) {
     const p = n.parent && (prev.get(n.parent) || pos.get(n.parent)), sx = prev.get(n.key)?.x ?? p?.x ?? 0, sy = prev.get(n.key)?.y ?? p?.y ?? 0;
     n.cx = sx; n.cy = sy;
-    if (n.parent) { n.line = document.createElementNS(NS, "line"); n.line.setAttribute("class", n.tick ? "brace" : "edge"); if (n.tick) n.line.style.stroke = n.color; gE.append(n.line); }
+    if (n.parent) { n.line = document.createElementNS(NS, "line"); n.line.setAttribute("class", n.tick ? "brace" : "edge"); n.line.style.stroke = n.color; gE.append(n.line); }
     n.cellule = n.hub ? "root" : n.cat ? n.key : pos.get(n.parent).cellule;
     if (n.spine) { const b = document.createElementNS(NS, "path"); b.setAttribute("class", "brace"); b.style.stroke = n.color; b.setAttribute("d", cheminAccolade(n.spine)); gE.append(b); n.spineEl = b; }
     const g = document.createElementNS(NS, "g");
@@ -304,10 +310,9 @@ function etiquette(txt, hub) { // texte horizontal dans un sprite : fait toujour
   const T = M3.T, f = (hub ? "700 30px " : "26px ") + css("--font"), cv = document.createElement("canvas"), x = cv.getContext("2d");
   x.font = f; const w = Math.ceil(x.measureText(txt).width) + 12; cv.width = w; cv.height = 40;
   x.font = f; x.textBaseline = "middle"; x.lineJoin = "round"; x.textAlign = hub ? "center" : "left";
-  if (!hub) { x.lineWidth = 6; x.strokeStyle = css("--bg"); x.strokeText(txt, 6, 21); }
   x.fillStyle = css(hub ? "--on-accent" : "--ink"); x.fillText(txt, hub ? w / 2 : 6, 21);
   const sp = new T.Sprite(new T.SpriteMaterial({map: new T.CanvasTexture(cv), depthTest: false, transparent: true}));
-  sp.scale.set(w * .62, 40 * .62, 1); sp.center.set(hub ? .5 : 0, .5); return sp;
+  sp.scale.set(w * .5, 40 * .5, 1); sp.center.set(hub ? .5 : 0, .5); return sp;
 }
 function draw3d() {
   const T = M3.T; if (!T) return; const g = M3.s;
@@ -317,28 +322,43 @@ function draw3d() {
     const p = P.get(n.parent) || new T.Vector3(), dx = n.x - (p.ox ?? 0), dy = n.y - (p.oy ?? 0), k = kids.get(n.parent) || 0; kids.set(n.parent, k + 1);
     const v = new T.Vector3(p.x + dx, p.y + dy, p.z + Math.sin(k * 2.399 + i) * Math.hypot(dx, dy) * .8); v.ox = n.x; v.oy = n.y; P.set(n.key, v); n.p3 = v;
   });
-  const pts = [], pick = [];
+  const cyl = new T.CylinderGeometry(.5, .5, 1, 8), pick = [], cell = new Map(), items = [], segs = []; // items : objets qui flottent avec leur cellule
   for (const n of scene) {
+    const ce = n.hub ? "root" : n.cat ? n.key : cell.get(n.parent); cell.set(n.key, ce);
     const m = new T.Mesh(new T.SphereGeometry(n.r * (selected === n.key ? 1.5 : 1), 20, 14), new T.MeshBasicMaterial({color: n.color}));
-    m.position.copy(n.p3); m.userData.n = n; g.add(m); pick.push(m);
+    m.position.copy(n.p3); m.userData.n = n; g.add(m); pick.push(m); items.push({o: m, b: m.position.clone(), ce});
     const lab = etiquette(n.hub ? "Index" : cut(n.label, 40) + (n.kids && !open.has(n.key) ? " ▸" : ""), n.hub);
-    lab.position.copy(n.p3); if (!n.hub) lab.position.x += n.r + 4; lab.renderOrder = 1; lab.userData.n = n; g.add(lab); pick.push(lab);
-    if (n.parent) pts.push(P.get(n.parent), n.p3);
+    lab.position.copy(n.p3); if (!n.hub) lab.position.x += n.r + 6; lab.renderOrder = 1; lab.userData.n = n; g.add(lab); pick.push(lab); items.push({o: lab, b: lab.position.clone(), ce});
+    if (n.parent) { // branche : même couleur, épaisseur et opacité qu'en 2D (traits d'accolade plus fins)
+      const w = n.tick ? 2.6 : 3, mat = new T.MeshBasicMaterial({color: n.color, transparent: true, opacity: n.tick ? .7 : .85});
+      const tube = new T.Mesh(cyl, mat); g.add(tube);
+      segs.push({a: P.get(n.parent).clone(), ae: cell.get(n.parent), b: n.p3.clone(), be: ce, w, tube});
+    }
   }
-  g.add(new T.LineSegments(new T.BufferGeometry().setFromPoints(pts), new T.LineBasicMaterial({color: css("--line")})));
-  M3.pick = pick;
+  M3.pick = pick; M3.items = items; M3.segs = segs;
   if (!M3.cadre) { // recadrage au premier affichage seulement
     M3.cadre = true; M3.d = Math.max(...scene.map(n => n.p3.length())) * 2.6 + 200;
   }
   redraw3d();
 }
-function redraw3d() {
-  cancelAnimationFrame(M3.q); M3.q = requestAnimationFrame(() => {
-    const {r, c, s, th, ph, d} = M3;
+// Flottement 3D : même orbite lente qu'en 2D par cellule, plus un léger mouvement en profondeur.
+function flot3d(ce, t) { const f = flottement(ce, t), k = 1.5; return [f.x * k, f.y * k, (f.x - f.y) * .7 * k]; }
+function redraw3d() { // lance la boucle d'animation (caméra et flottement sont relus à chaque image)
+  if (M3.q) return;
+  const frame = now => {
+    if (!M3.on) { M3.q = 0; return; }
+    const {r, c, s, th, ph, d} = M3, F = new Map(), off = ce => F.get(ce) ?? F.set(ce, flot3d(ce, now)).get(ce);
+    for (const {o, b, ce} of M3.items ?? []) { const f = off(ce); o.position.set(b.x + f[0], b.y + f[1], b.z + f[2]); }
+    for (const sg of M3.segs ?? []) { // chaque branche = cylindre fin tendu entre ses deux extrémités flottantes
+      const fa = off(sg.ae), fb = off(sg.be), A = sg.a.clone().add(new M3.T.Vector3(...fa)), B = sg.b.clone().add(new M3.T.Vector3(...fb)), v = B.clone().sub(A);
+      sg.tube.position.copy(A).addScaledVector(v, .5); sg.tube.scale.set(sg.w, v.length() || 1e-3, sg.w);
+      sg.tube.quaternion.setFromUnitVectors(new M3.T.Vector3(0, 1, 0), v.normalize());
+    }
     r.setSize(innerWidth, innerHeight, false); c.aspect = innerWidth / innerHeight;
     c.position.set(d * Math.sin(ph) * Math.sin(th), d * Math.cos(ph), d * Math.sin(ph) * Math.cos(th)); c.lookAt(0, 0, 0); c.updateProjectionMatrix();
-    r.render(s, c);
-  });
+    r.render(s, c); M3.q = requestAnimationFrame(frame);
+  };
+  M3.q = requestAnimationFrame(frame);
 }
 {
   const gl = $("#gl"); let dr = null;

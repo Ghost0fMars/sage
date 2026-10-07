@@ -50,11 +50,9 @@ export default function CloudSyncProvider({ children }: { children: React.ReactN
       const user = sessionData.session?.user;
 
       if (!user) {
+        // Accès sans compte : l'app fonctionne en local (utilisateur par défaut).
         if (mounted) {
           setReady(true);
-          if (pathname !== "/auth") {
-            router.replace("/auth");
-          }
         }
         return;
       }
@@ -62,11 +60,9 @@ export default function CloudSyncProvider({ children }: { children: React.ReactN
       const statutAcces = await verifierAcces(user);
 
       if (statutAcces !== "approved") {
+        // Compte non validé : pas de synchronisation cloud, mais l'app reste utilisable en local.
         if (mounted) {
           setReady(true);
-          if (pathname !== "/auth") {
-            router.replace(`/auth?validation=${statutAcces}`);
-          }
         }
         return;
       }

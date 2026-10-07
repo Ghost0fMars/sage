@@ -8,17 +8,11 @@ import {
   type LocalUser
 } from "./lib/user-storage";
 import { getDisciplineColor } from "./lib/discipline-colors";
-
-type SeanceDetaillee = {
-  titre: string;
-  objectif: string;
-  niveau: string;
-  dureeTotale: string;
-  materielGlobal: string;
-};
+import FicheSeanceModal, { type SeanceDetaillee } from "./components/FicheSeanceModal";
 
 type TuilePlanning = {
   id: string;
+  preparedLessonId?: string;
   titreSequence: string;
   seanceLabel: string;
   domaine: string;
@@ -143,6 +137,7 @@ export default function TableauDeBord() {
     notes: ""
   });
   const [ajoutAgendaOuvert, setAjoutAgendaOuvert] = useState(false);
+  const [ficheOuverteId, setFicheOuverteId] = useState("");
 
   useEffect(() => {
     setUser(getCurrentUser());
@@ -196,6 +191,24 @@ export default function TableauDeBord() {
 
     return tuilesPlanifiees.filter((tuile) => tuile.date === dateCahierJournal);
   }, [dateCahierJournal, prochainesSeances, tuilesPlanifiees]);
+
+  const ficheOuverte = tuiles.find((tuile) => tuile.id === ficheOuverteId);
+
+  function enregistrerFiche(tuile: TuilePlanning, lesson: SeanceDetaillee) {
+    if (JSON.stringify(lesson) === JSON.stringify(tuile.lesson)) return;
+    const nouvellesTuiles = tuiles.map((item) => (item.id === tuile.id ? { ...item, lesson } : item));
+    setTuiles(nouvellesTuiles);
+    writeUserData(PLANNING_STORAGE_KEY, nouvellesTuiles);
+
+    if (tuile.preparedLessonId) {
+      const fiches = readUserData<SeancePreparee[]>(PREPARED_LESSONS_STORAGE_KEY, []);
+      const nouvellesFiches = fiches.map((fiche) =>
+        fiche.id === tuile.preparedLessonId ? { ...fiche, lesson } : fiche
+      );
+      setSeancesPreparees(nouvellesFiches);
+      writeUserData(PREPARED_LESSONS_STORAGE_KEY, nouvellesFiches);
+    }
+  }
 
   const moisAgenda = dateAgenda.slice(0, 7);
 
@@ -360,10 +373,9 @@ export default function TableauDeBord() {
               {seancesDuJour.map((tuile) => (
                 <article
                   key={tuile.id}
-                  className="rounded-md border border-l-[6px] p-4"
+                  className="rounded-lg p-4 shadow-sm"
                   style={{
                     backgroundColor: getDisciplineColor(tuile.domaine).softBackground,
-                    borderColor: getDisciplineColor(tuile.domaine).border,
                     color: getDisciplineColor(tuile.domaine).text
                   }}
                 >
@@ -374,6 +386,13 @@ export default function TableauDeBord() {
                   <p className="mt-1 text-base opacity-80">
                     Séance {tuile.seanceLabel} · {tuile.dureeMinutes} min · {tuile.domaine}
                   </p>
+                  <button
+                    type="button"
+                    onClick={() => setFicheOuverteId(tuile.id)}
+                    className="mt-3 rounded-md bg-white px-3 py-1.5 text-sm font-semibold text-slate-950 shadow-sm transition hover:bg-slate-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500"
+                  >
+                    Voir la fiche
+                  </button>
                 </article>
               ))}
             </div>
@@ -512,6 +531,15 @@ export default function TableauDeBord() {
           </div>
         </section>
       </div>
+
+      {ficheOuverte && (
+        <FicheSeanceModal
+          open
+          lesson={ficheOuverte.lesson}
+          onClose={() => setFicheOuverteId("")}
+          onSave={(lesson) => enregistrerFiche(ficheOuverte, lesson)}
+        />
+      )}
     </main>
   );
 }

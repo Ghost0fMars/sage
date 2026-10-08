@@ -65,6 +65,10 @@ async function createWindow() {
     minWidth: 900,
     minHeight: 600,
     title: 'Sage',
+    // L'exe Windows porte déjà l'icône (electron-builder) ; nécessaire sous Linux.
+    icon: app.isPackaged
+      ? path.join(process.resourcesPath, 'standalone', 'public', 'icons', 'icon-512.png')
+      : path.join(__dirname, '..', 'public', 'icons', 'icon-512.png'),
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       nodeIntegration: false,

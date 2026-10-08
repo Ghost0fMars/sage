@@ -192,7 +192,7 @@ const selectionVide: Selection = {
 };
 
 const libelles: Record<keyof Selection, string> = {
-  cycle: "Cycle",
+  cycle: "Référentiel",
   niveau: "Niveau",
   domaine: "Domaine",
   sousDomaine: "Sous-domaine",
@@ -946,7 +946,7 @@ export default function PagePreparation() {
             <p className="mt-3 max-w-2xl text-base leading-7 text-slate-700">
               {modePrompt
                 ? "Décrivez librement la séquence souhaitée. L'IA se charge du reste."
-                : "Choisissez progressivement un cycle, un niveau, un domaine, puis une compétence issue des programmes de l'Éducation Nationale."}
+                : "Choisissez progressivement un référentiel, un niveau, un domaine, puis une compétence issue des programmes de l'Éducation Nationale."}
             </p>
           </div>
           <a

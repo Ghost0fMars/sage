@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SAGE — préparation pédagogique</title>
+<meta name="description" content="Préparer ses séquences et séances, du référentiel de compétences à la séance imprimable, avec l'IA souveraine Albert.">
+<link rel="icon" href="icon-192.png">
+<style>
+  :root { --bleu: #000091; --bleu-hover: #1212ff; --texte: #161616; --gris: #3a3a3a; --fond: #f6f6f6; --carte: #fff; --bord: #dddddd; }
+  @media (prefers-color-scheme: dark) { :root { --bleu: #8585f6; --bleu-hover: #a1a1f8; --texte: #eee; --gris: #cecece; --fond: #161616; --carte: #2a2a2a; --bord: #3a3a3a; } }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: Marianne, Arial, sans-serif; background: var(--fond); color: var(--texte); line-height: 1.6; }
+  main { max-width: 46rem; margin: 0 auto; padding: 3rem 1rem; }
+  header { display: flex; align-items: center; gap: 1rem; }
+  header img { width: 64px; height: 64px; border-radius: 12px; }
+  h1 { margin: 0; font-size: 2rem; }
+  .sous-titre { margin: 0; color: var(--gris); }
+  section { background: var(--carte); border: 1px solid var(--bord); border-radius: 8px; padding: 1.25rem; margin-top: 1.5rem; }
+  h2 { margin-top: 0; font-size: 1.25rem; }
+  .boutons { display: flex; flex-wrap: wrap; gap: .75rem; }
+  .bouton { display: inline-block; padding: .75rem 1.25rem; border-radius: 6px; background: var(--bleu); color: #fff; font-weight: 700; text-decoration: none; }
+  .bouton:hover { background: var(--bleu-hover); }
+  .bouton.secondaire { background: transparent; color: var(--bleu); border: 1px solid var(--bleu); }
+  a { color: var(--bleu); }
+  a:focus-visible { outline: 2px solid #0a76f6; outline-offset: 2px; }
+  ul { padding-left: 1.25rem; }
+  small { color: var(--gris); }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <img src="icon-512.png" alt="">
+    <div>
+      <h1>SAGE</h1>
+      <p class="sous-titre">Système d'Assistance et de Gestion Éducative</p>
+    </div>
+  </header>
+
+  <section>
+    <p>Préparez vos séquences et séances, du référentiel de compétences jusqu'à la séance prête à imprimer, avec l'aide d'Albert, l'IA de l'État (DINUM / Etalab).</p>
+    <div class="boutons">
+      <a class="bouton" href="https://forge.apps.education.fr/elavallard/sage/-/releases/permalink/latest/downloads/Sage-windows.exe">Télécharger pour Windows</a>
+      <a class="bouton" href="https://forge.apps.education.fr/elavallard/sage/-/releases/permalink/latest/downloads/Sage-linux.AppImage">Télécharger pour Linux</a>
+    </div>
+    <p><small>Linux : rendez le fichier exécutable (<code>chmod +x Sage-linux.AppImage</code>) puis lancez-le. <a href="https://forge.apps.education.fr/elavallard/sage/-/releases">Toutes les versions</a></small></p>
+  </section>
+
+  <section>
+    <h2>Fonctionnalités</h2>
+    <ul>
+      <li>Objectif pédagogique, progression de séquence et séances détaillées générés à partir du référentiel</li>
+      <li>Export des séances en PDF, bibliothèque et planning hebdomadaire</li>
+      <li>Classes multi-niveaux, suivi des élèves, évaluations et cahier journal</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Données personnelles</h2>
+    <p>SAGE fonctionne sans compte ni service cloud : vos données restent sur votre ordinateur. Seul le texte envoyé à l'assistant transite par Albert, avec votre clé personnelle, à saisir dans <strong>Paramètres › Assistant IA</strong> (<a href="https://albert.playground.etalab.gouv.fr/keys">obtenir une clé</a>, réservée aux agents publics).</p>
+    <p>Pendant la bêta, n'entrez pas de données réelles permettant d'identifier des élèves.</p>
+  </section>
+
+  <section>
+    <h2>Projet libre</h2>
+    <p>Code source sous licence AGPL-3.0 sur <a href="https://forge.apps.education.fr/elavallard/sage">la Forge des communs numériques éducatifs</a>. Bêta ouverte : vos retours sont bienvenus dans les <a href="https://forge.apps.education.fr/elavallard/sage/-/issues">tickets</a>.</p>
+    <p><small>Développé par Étienne — <a href="https://alacle.org">àlaclé</a>.</small></p>
+  </section>
+</main>
+</body>
+</html>

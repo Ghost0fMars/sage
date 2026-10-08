@@ -50,7 +50,7 @@ Dans tous les modes : ne collez jamais de données personnelles non anonymisées
 ## Prérequis
 
 - **Node.js** 18 ou supérieur et **npm**
-- Une **clé API Albert** (agents publics uniquement — voir [albert.api.etalab.gouv.fr](https://albert.api.etalab.gouv.fr)), configurée côté serveur
+- Une **clé API Albert** (agents publics uniquement — voir [albert.api.etalab.gouv.fr](https://albert.api.etalab.gouv.fr)), saisie dans **Paramètres › Assistant IA**
 
 ---
 
@@ -77,7 +77,7 @@ ALBERT_API_KEY=votre_cle_api_albert
 ALBERT_MODEL=deepseek-v4-flash
 ```
 
-La clé reste côté serveur grâce aux routes API (`app/api/.../route.ts`) et n'est jamais exposée au navigateur. Il n'y a plus de modèle BYOK : tous les enseignants utilisent la même clé Albert, gérée par l'administrateur du service.
+Chaque enseignant saisit sa propre clé dans **Paramètres › Assistant IA**. Elle est stockée sur son appareil et transmise aux routes API (`app/api/.../route.ts`), qui la relaient à Albert. `ALBERT_API_KEY` n'est qu'une clé de repli facultative pour un déploiement maîtrisé.
 
 ---
 
@@ -97,9 +97,15 @@ Puis ouvrez [http://localhost:3000](http://localhost:3000).
 
 C'est le mode d'usage visé : un enseignant installe SAGE comme une application native, sans navigateur, sans compte à créer, sans connexion. Toutes les données (élèves, séances, planning...) restent sur sa machine ; seul le texte envoyé à l'assistant transite par Albert API.
 
-### Construire l'installateur
+### Télécharger
 
-1. Créer `.env.electron` à la racine (à partir de `.env.electron.example`) avec la clé `ALBERT_API_KEY` à embarquer dans l'application distribuée — **une seule clé partagée par tous les enseignants qui installeront ce build**, jamais demandée à l'utilisateur.
+Les installateurs Windows (`.exe`) et Linux (AppImage) sont publiés dans les [Releases du projet sur la Forge](https://forge.apps.education.fr/elavallard/sage/-/releases). Au premier lancement, renseignez votre clé API Albert dans **Paramètres › Assistant IA**.
+
+Les Releases sont construites par `.gitlab-ci.yml` à chaque tag `vX.Y.Z` (`git tag v0.1.0 && git push origin v0.1.0`). Ne définissez **pas** de variable CI `ALBERT_API_KEY` : elle serait embarquée dans l'installateur public.
+
+### Construire l'installateur soi-même
+
+1. Créer `.env.electron` à la racine (à partir de `.env.electron.example`) Laisser `ALBERT_API_KEY` vide pour une diffusion publique : chaque enseignant saisit sa clé dans l'app. Une clé renseignée ici est embarquée comme clé de repli, à réserver à une diffusion maîtrisée.
 2. Indexer les textes officiels : PDF dans `public/carte/référentiels/` (non versionnés), puis `npm run index-corpus` (Python + `pip install pymupdf`). L'index (`public/carte/data/`) alimente la Carte des guides, l'assistant et la génération ; à relancer après tout ajout ou modification de PDF.
 3. Lancer la commande correspondant à la plateforme cible :
 
@@ -117,7 +123,7 @@ C'est le mode d'usage visé : un enseignant installe SAGE comme une application 
 - Au lancement, `electron/main.js` démarre ce serveur Next.js en local (`127.0.0.1`, port interne) et ouvre une fenêtre native pointant dessus — `electron/server-runner.js` charge `albert.env` avant de démarrer le serveur.
 - `npm run electron:dev` permet de tester ce comportement en développement (fenêtre Electron + `next dev`).
 
-⚠️ La clé Albert embarquée est extractible par quiconque décompile l'installateur (c'est une conséquence du modèle « une clé partagée, zéro configuration »). Adapté à une diffusion maîtrisée (établissement, département) ; à revoir avant une diffusion grand public non contrôlée.
+⚠️ Une clé Albert embarquée via `.env.electron` est extractible par quiconque décompile l'installateur. Ne jamais en embarquer une dans un build diffusé publiquement.
 
 ---
 

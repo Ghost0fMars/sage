@@ -106,7 +106,7 @@ Les Releases sont construites par `.gitlab-ci.yml` à chaque tag `vX.Y.Z` (`git 
 ### Construire l'installateur soi-même
 
 1. Créer `.env.electron` à la racine (à partir de `.env.electron.example`) Laisser `ALBERT_API_KEY` vide pour une diffusion publique : chaque enseignant saisit sa clé dans l'app. Une clé renseignée ici est embarquée comme clé de repli, à réserver à une diffusion maîtrisée.
-2. Indexer les textes officiels : PDF dans `public/carte/référentiels/` (non versionnés), puis `npm run index-corpus` (Python + `pip install pymupdf`). L'index (`public/carte/data/`) alimente la Carte des guides, l'assistant et la génération ; à relancer après tout ajout ou modification de PDF.
+2. Les textes officiels (PDF dans `public/carte/référentiels/`) et leur index (`public/carte/data/`) sont versionnés : l'index alimente la Carte des guides, l'assistant et la génération. Après tout ajout ou modification de PDF, relancer `npm run index-corpus` (Python + `pip install pymupdf`).
 3. Lancer la commande correspondant à la plateforme cible :
 
    ```bash

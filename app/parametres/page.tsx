@@ -57,25 +57,30 @@ export default function ParametresPage() {
     const cle = lireCleAlbert();
     setCleAlbert(cle);
     setModeleAlbert(lireModeleAlbert());
-    if (cle) void chargerModeles(cle);
+    void chargerModeles(cle);
   }, []);
 
+  // Sans clé personnelle, interroge la clé intégrée à Sage (ALBERT_API_KEY du serveur).
   async function chargerModeles(cle: string) {
     setAlbertEnCours(true);
     setAlbertMessage("");
 
     try {
-      const response = await fetch("/api/albert-models", { headers: { [ALBERT_KEY_HEADER]: cle } });
+      const response = await fetch("/api/albert-models", cle ? { headers: { [ALBERT_KEY_HEADER]: cle } } : undefined);
       const data = (await response.json()) as { modeles?: string[]; error?: string };
 
       if (!response.ok || !data.modeles) {
         setModelesAlbert([]);
-        setAlbertMessage(data.error ?? "Impossible de récupérer les modèles.");
+        setAlbertMessage(cle ? data.error ?? "Impossible de récupérer les modèles." : "");
         return;
       }
 
       setModelesAlbert(data.modeles);
-      setAlbertMessage(`Clé valide : ${data.modeles.length} modèle(s) disponible(s).`);
+      setAlbertMessage(
+        cle
+          ? `Clé valide : ${data.modeles.length} modèle(s) disponible(s).`
+          : `Clé intégrée à Sage active : ${data.modeles.length} modèle(s) disponible(s).`
+      );
     } catch {
       setAlbertMessage("Impossible de joindre le serveur.");
     } finally {
@@ -91,9 +96,6 @@ export default function ParametresPage() {
     if (!cle) {
       ecrireModeleAlbert("");
       setModeleAlbert("");
-      setModelesAlbert([]);
-      setAlbertMessage("Clé supprimée de cet appareil.");
-      return;
     }
 
     await chargerModeles(cle);
@@ -406,7 +408,7 @@ export default function ParametresPage() {
                   autoComplete="off"
                   spellCheck={false}
                   className="min-w-0 flex-1 rounded-md border border-slate-300 px-3 py-3 text-base outline-none focus:border-teal-600 focus:ring-2 focus:ring-focus"
-                  placeholder="Collez votre clé API"
+                  placeholder="Facultatif : clé intégrée à Sage utilisée par défaut"
                 />
                 <button
                   type="button"
@@ -438,7 +440,7 @@ export default function ParametresPage() {
               </select>
               {modelesAlbert.length === 0 && (
                 <span className="text-sm font-normal text-slate-600">
-                  Connectez-vous avec votre clé pour choisir un modèle.
+                  Saisissez une clé API pour choisir un modèle.
                 </span>
               )}
             </label>

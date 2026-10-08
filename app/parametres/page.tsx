@@ -2,13 +2,6 @@
 
 import { FormEvent, useEffect, useRef, useState } from "react";
 import { readUserData, writeUserData } from "../lib/user-storage";
-import {
-  ALBERT_KEY_HEADER,
-  ecrireCleAlbert,
-  ecrireModeleAlbert,
-  lireCleAlbert,
-  lireModeleAlbert
-} from "../lib/albert-settings";
 import { extraireTextePdf } from "../lib/pdf-text";
 import { CLASSES_STORAGE_KEY, Classe, NIVEAUX_SCOLAIRES, lireClasses } from "../lib/classes";
 
@@ -46,66 +39,6 @@ export default function ParametresPage() {
   const [reglementEnCours, setReglementEnCours] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
   const [classes, setClasses] = useState<Classe[]>([]);
-  const [cleAlbert, setCleAlbert] = useState("");
-  const [cleVisible, setCleVisible] = useState(false);
-  const [modeleAlbert, setModeleAlbert] = useState("");
-  const [modelesAlbert, setModelesAlbert] = useState<string[]>([]);
-  const [albertMessage, setAlbertMessage] = useState("");
-  const [albertEnCours, setAlbertEnCours] = useState(false);
-
-  useEffect(() => {
-    const cle = lireCleAlbert();
-    setCleAlbert(cle);
-    setModeleAlbert(lireModeleAlbert());
-    void chargerModeles(cle);
-  }, []);
-
-  // Sans clé personnelle, interroge la clé intégrée à Sage (ALBERT_API_KEY du serveur).
-  async function chargerModeles(cle: string) {
-    setAlbertEnCours(true);
-    setAlbertMessage("");
-
-    try {
-      const response = await fetch("/api/albert-models", cle ? { headers: { [ALBERT_KEY_HEADER]: cle } } : undefined);
-      const data = (await response.json()) as { modeles?: string[]; error?: string };
-
-      if (!response.ok || !data.modeles) {
-        setModelesAlbert([]);
-        setAlbertMessage(cle ? data.error ?? "Impossible de récupérer les modèles." : "");
-        return;
-      }
-
-      setModelesAlbert(data.modeles);
-      setAlbertMessage(
-        cle
-          ? `Clé valide : ${data.modeles.length} modèle(s) disponible(s).`
-          : `Clé intégrée à Sage active : ${data.modeles.length} modèle(s) disponible(s).`
-      );
-    } catch {
-      setAlbertMessage("Impossible de joindre le serveur.");
-    } finally {
-      setAlbertEnCours(false);
-    }
-  }
-
-  async function connecterAlbert(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    const cle = cleAlbert.trim();
-    ecrireCleAlbert(cle);
-
-    if (!cle) {
-      ecrireModeleAlbert("");
-      setModeleAlbert("");
-    }
-
-    await chargerModeles(cle);
-  }
-
-  function choisirModele(modele: string) {
-    setModeleAlbert(modele);
-    ecrireModeleAlbert(modele);
-  }
-
   useEffect(() => {
     try {
       const stored = localStorage.getItem(PROFILE_KEY);
@@ -379,92 +312,6 @@ export default function ParametresPage() {
           >
             Ajouter une classe
           </button>
-        </section>
-
-        <section className="mt-6 rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
-          <h2 className="text-xl font-bold text-slate-950">Assistant IA</h2>
-          <p className="mt-2 leading-7 text-slate-700">
-            L&apos;assistant IA de Sage est propulsé par <strong>Albert</strong>, l&apos;API
-            d&apos;intelligence artificielle de l&apos;État (DINUM / Etalab). Une clé API
-            personnelle est conseillée : les données restent hébergées en France, sous droit français.
-          </p>
-          <a
-            href="https://albert.playground.etalab.gouv.fr/keys"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="mt-3 inline-block text-sm font-semibold text-teal-700 underline underline-offset-2 hover:text-teal-800"
-          >
-            Se connecter pour récupérer une clé API Albert
-          </a>
-
-          <form onSubmit={connecterAlbert} className="mt-5 grid gap-4">
-            <label className="grid gap-2 text-sm font-semibold text-slate-800">
-              Clé API Albert
-              <span className="flex gap-2">
-                <input
-                  type={cleVisible ? "text" : "password"}
-                  value={cleAlbert}
-                  onChange={(event) => setCleAlbert(event.target.value)}
-                  autoComplete="off"
-                  spellCheck={false}
-                  className="min-w-0 flex-1 rounded-md border border-slate-300 px-3 py-3 text-base outline-none focus:border-teal-600 focus:ring-2 focus:ring-focus"
-                  placeholder="Facultatif : clé intégrée à Sage utilisée par défaut"
-                />
-                <button
-                  type="button"
-                  onClick={() => setCleVisible(!cleVisible)}
-                  className="rounded-md border border-slate-300 bg-white px-3 text-sm font-semibold text-slate-900 transition hover:bg-slate-100"
-                >
-                  {cleVisible ? "Masquer" : "Afficher"}
-                </button>
-              </span>
-            </label>
-
-            <label className="grid gap-2 text-sm font-semibold text-slate-800">
-              Modèle
-              <select
-                value={modeleAlbert}
-                onChange={(event) => choisirModele(event.target.value)}
-                disabled={modelesAlbert.length === 0}
-                className="rounded-md border border-slate-300 bg-white px-3 py-3 text-base outline-none focus:border-teal-600 focus:ring-2 focus:ring-focus disabled:bg-slate-100 disabled:text-slate-400"
-              >
-                <option value="">Modèle par défaut</option>
-                {modeleAlbert && !modelesAlbert.includes(modeleAlbert) && (
-                  <option value={modeleAlbert}>{modeleAlbert}</option>
-                )}
-                {modelesAlbert.map((modele) => (
-                  <option key={modele} value={modele}>
-                    {modele}
-                  </option>
-                ))}
-              </select>
-              {modelesAlbert.length === 0 && (
-                <span className="text-sm font-normal text-slate-600">
-                  Saisissez une clé API pour choisir un modèle.
-                </span>
-              )}
-            </label>
-
-            {albertMessage && (
-              <p className="rounded-md bg-slate-100 p-3 text-base text-slate-700" role="status">
-                {albertMessage}
-              </p>
-            )}
-
-            <div>
-              <button
-                type="submit"
-                disabled={albertEnCours}
-                className="rounded-md bg-teal-700 px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-teal-800 disabled:cursor-wait disabled:bg-slate-100 disabled:text-slate-400 disabled:shadow-none"
-              >
-                {albertEnCours ? "Connexion..." : "Se connecter et lister les modèles"}
-              </button>
-            </div>
-            <p className="text-sm text-slate-600">
-              La clé est conservée uniquement sur cet appareil et n&apos;est pas synchronisée avec
-              votre compte.
-            </p>
-          </form>
         </section>
 
         <section className="mt-6 rounded-lg border border-slate-200 bg-white p-5 shadow-sm">

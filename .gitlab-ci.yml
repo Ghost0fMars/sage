@@ -19,8 +19,8 @@ build:
     - npm pkg set version="${CI_COMMIT_TAG#v}"
     - node scripts/electron-prepare.mjs
     - CSC_IDENTITY_AUTO_DISCOVERY=false npx electron-builder --linux --win --publish=never
-    - curl --fail -sS -H "JOB-TOKEN: ${CI_JOB_TOKEN}" --upload-file dist-electron/Sage-*-win.exe "${PACKAGE_URL}/Sage-windows.exe"
-    - curl --fail -sS -H "JOB-TOKEN: ${CI_JOB_TOKEN}" --upload-file dist-electron/Sage-*-linux.AppImage "${PACKAGE_URL}/Sage-linux.AppImage"
+    - 'curl --fail -sS -H "JOB-TOKEN: ${CI_JOB_TOKEN}" --upload-file dist-electron/Sage-*-win.exe "${PACKAGE_URL}/Sage-windows.exe"'
+    - 'curl --fail -sS -H "JOB-TOKEN: ${CI_JOB_TOKEN}" --upload-file dist-electron/Sage-*-linux.AppImage "${PACKAGE_URL}/Sage-linux.AppImage"'
 
 release:
   stage: release

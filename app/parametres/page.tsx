@@ -2,6 +2,7 @@
 
 import { FormEvent, useEffect, useRef, useState } from "react";
 import { readUserData, writeUserData } from "../lib/user-storage";
+import { ecrireCleAlbert, lireCleAlbert } from "../lib/albert-settings";
 import { extraireTextePdf } from "../lib/pdf-text";
 import { CLASSES_STORAGE_KEY, Classe, NIVEAUX_SCOLAIRES, lireClasses } from "../lib/classes";
 
@@ -39,6 +40,18 @@ export default function ParametresPage() {
   const [reglementEnCours, setReglementEnCours] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
   const [classes, setClasses] = useState<Classe[]>([]);
+  const [cleAlbert, setCleAlbert] = useState("");
+  const [cleVisible, setCleVisible] = useState(false);
+  const [albertMessage, setAlbertMessage] = useState("");
+
+  useEffect(() => setCleAlbert(lireCleAlbert()), []);
+
+  function enregistrerCleAlbert(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    ecrireCleAlbert(cleAlbert);
+    setAlbertMessage(cleAlbert.trim() ? "Clé enregistrée sur cet appareil." : "Clé supprimée.");
+  }
+
   useEffect(() => {
     try {
       const stored = localStorage.getItem(PROFILE_KEY);
@@ -312,6 +325,65 @@ export default function ParametresPage() {
           >
             Ajouter une classe
           </button>
+        </section>
+
+        <section className="mt-6 rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+          <h2 className="text-xl font-bold text-slate-950">Assistant IA</h2>
+          <p className="mt-2 leading-7 text-slate-700">
+            L&apos;assistant IA de Sage est propulsé par <strong>Albert</strong>, l&apos;API
+            d&apos;intelligence artificielle de l&apos;État (DINUM / Etalab). Saisissez votre clé API
+            personnelle pour l&apos;activer.
+          </p>
+          <a
+            href="https://albert.playground.etalab.gouv.fr/keys"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-3 inline-block text-sm font-semibold text-teal-700 underline underline-offset-2 hover:text-teal-800"
+          >
+            Se connecter pour récupérer une clé API Albert
+          </a>
+
+          <form onSubmit={enregistrerCleAlbert} className="mt-5 grid gap-4">
+            <label className="grid gap-2 text-sm font-semibold text-slate-800">
+              Clé API Albert
+              <span className="flex gap-2">
+                <input
+                  type={cleVisible ? "text" : "password"}
+                  value={cleAlbert}
+                  onChange={(event) => setCleAlbert(event.target.value)}
+                  autoComplete="off"
+                  spellCheck={false}
+                  className="min-w-0 flex-1 rounded-md border border-slate-300 px-3 py-3 text-base outline-none focus:border-teal-600 focus:ring-2 focus:ring-focus"
+                  placeholder="Votre clé API Albert"
+                />
+                <button
+                  type="button"
+                  onClick={() => setCleVisible(!cleVisible)}
+                  className="rounded-md border border-slate-300 bg-white px-3 text-sm font-semibold text-slate-900 transition hover:bg-slate-100"
+                >
+                  {cleVisible ? "Masquer" : "Afficher"}
+                </button>
+              </span>
+            </label>
+
+            {albertMessage && (
+              <p className="rounded-md bg-slate-100 p-3 text-base text-slate-700" role="status">
+                {albertMessage}
+              </p>
+            )}
+
+            <div>
+              <button
+                type="submit"
+                className="rounded-md bg-teal-700 px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-teal-800"
+              >
+                Enregistrer la clé
+              </button>
+            </div>
+            <p className="text-sm text-slate-600">
+              La clé est conservée uniquement sur cet appareil.
+            </p>
+          </form>
         </section>
 
         <section className="mt-6 rounded-lg border border-slate-200 bg-white p-5 shadow-sm">

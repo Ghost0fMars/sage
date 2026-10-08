@@ -1,0 +1,43 @@
+# Construit l'app de bureau et publie une Release sur la Forge à chaque tag vX.Y.Z.
+#   git tag v0.1.0 && git push origin v0.1.0
+# Variable CI optionnelle (Paramètres > CI/CD > Variables, masquée + protégée) : ALBERT_API_KEY.
+# ponytail: pas de build macOS (exige un runner macOS), à ajouter si un runner Mac est disponible.
+
+stages: [build, release]
+
+variables:
+  PACKAGE_URL: "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/sage/${CI_COMMIT_TAG}"
+
+build:
+  stage: build
+  image: electronuserland/builder:20-wine
+  rules:
+    - if: $CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+$/
+  script:
+    - printf 'ALBERT_API_KEY=%s\nALBERT_MODEL=%s\n' "${ALBERT_API_KEY:-}" "${ALBERT_MODEL:-mistral-small-3-2-24b-instruct-2506}" > .env.electron
+    - npm ci
+    - npm pkg set version="${CI_COMMIT_TAG#v}"
+    - node scripts/electron-prepare.mjs
+    - CSC_IDENTITY_AUTO_DISCOVERY=false npx electron-builder --linux --win --publish=never
+    - curl --fail -sS -H "JOB-TOKEN: ${CI_JOB_TOKEN}" --upload-file dist-electron/Sage-*-win.exe "${PACKAGE_URL}/Sage-windows.exe"
+    - curl --fail -sS -H "JOB-TOKEN: ${CI_JOB_TOKEN}" --upload-file dist-electron/Sage-*-linux.AppImage "${PACKAGE_URL}/Sage-linux.AppImage"
+
+release:
+  stage: release
+  image: registry.gitlab.com/gitlab-org/release-cli:latest
+  rules:
+    - if: $CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+$/
+  script:
+    - echo "Release ${CI_COMMIT_TAG}"
+  release:
+    tag_name: $CI_COMMIT_TAG
+    name: "Sage $CI_COMMIT_TAG"
+    description: "Application de bureau Sage. Windows : installeur .exe. Linux : AppImage (chmod +x puis lancer)."
+    assets:
+      links:
+        - name: "Windows (installeur)"
+          url: "${PACKAGE_URL}/Sage-windows.exe"
+          link_type: package
+        - name: "Linux (AppImage)"
+          url: "${PACKAGE_URL}/Sage-linux.AppImage"
+          link_type: package

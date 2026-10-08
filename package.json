@@ -17,6 +17,7 @@
     "electron:dist:mac": "node scripts/electron-prepare.mjs && cross-env CSC_IDENTITY_AUTO_DISCOVERY=false electron-builder --mac --publish=never"
   },
   "dependencies": {
+    "electron-updater": "^6.1.8",
     "next": "14.2.5",
     "pdfjs-dist": "^6.1.200",
     "react": "18.3.1",
@@ -44,6 +45,10 @@
     "copyright": "Copyright © 2024 Alacle",
     "directories": {
       "output": "dist-electron"
+    },
+    "publish": {
+      "provider": "generic",
+      "url": "https://forge.apps.education.fr/api/v4/projects/17880/packages/generic/sage/latest"
     },
     "files": [
       "electron/**/*",

@@ -103,6 +103,12 @@ Les installateurs Windows (`.exe`) et Linux (AppImage) sont publiés dans les [R
 
 Les Releases sont construites par `.gitlab-ci.yml` à chaque tag `vX.Y.Z` (`git tag v0.1.0 && git push origin v0.1.0`). Ne définissez **pas** de variable CI `ALBERT_API_KEY` : elle serait embarquée dans l'installateur public.
 
+### Mises à jour
+
+Les versions installées (Windows et AppImage Linux) se mettent à jour seules : au lancement, `electron-updater` consulte le paquet générique `sage/latest` de la Forge (`build.publish` dans `package.json`), télécharge la nouvelle version en arrière-plan et l'installe à la fermeture de Sage. Publier une version suffit donc : `git tag vX.Y.Z && git push gitlab vX.Y.Z`. Le projet doit rester public sur la Forge pour que ce paquet soit lisible sans jeton.
+
+Les données de l'enseignant sont conservées d'une version à l'autre tant que le port interne (`PORT` dans `electron/main.js`), `productName` et `appId` ne changent pas. **Paramètres › Sauvegarde de mes données** permet en plus d'exporter et de restaurer toutes les données dans un fichier JSON.
+
 ### Construire l'installateur soi-même
 
 1. Créer `.env.electron` à la racine (à partir de `.env.electron.example`) Laisser `ALBERT_API_KEY` vide pour une diffusion publique : chaque enseignant saisit sa clé dans l'app. Une clé renseignée ici est embarquée comme clé de repli, à réserver à une diffusion maîtrisée.

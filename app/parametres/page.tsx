@@ -5,6 +5,7 @@ import { readUserData, writeUserData } from "../lib/user-storage";
 import { ecrireCleAlbert, lireCleAlbert } from "../lib/albert-settings";
 import { extraireTextePdf } from "../lib/pdf-text";
 import { CLASSES_STORAGE_KEY, Classe, NIVEAUX_SCOLAIRES, lireClasses } from "../lib/classes";
+import { exporterSauvegarde, lireSauvegarde, restaurerSauvegarde } from "../lib/sauvegarde";
 
 const PROFILE_KEY = "sage-profile";
 const REGLEMENT_STORAGE_KEY = "sage-reglement-interieur";
@@ -43,6 +44,8 @@ export default function ParametresPage() {
   const [cleAlbert, setCleAlbert] = useState("");
   const [cleVisible, setCleVisible] = useState(false);
   const [albertMessage, setAlbertMessage] = useState("");
+  const sauvegardeRef = useRef<HTMLInputElement>(null);
+  const [sauvegardeErreur, setSauvegardeErreur] = useState("");
 
   useEffect(() => setCleAlbert(lireCleAlbert()), []);
 
@@ -148,6 +151,29 @@ export default function ParametresPage() {
     setReglement(null);
     writeUserData(REGLEMENT_STORAGE_KEY, null);
     if (fileRef.current) fileRef.current.value = "";
+  }
+
+  async function importerSauvegarde(fichier: File | undefined) {
+    if (sauvegardeRef.current) sauvegardeRef.current.value = "";
+    if (!fichier) return;
+    setSauvegardeErreur("");
+
+    try {
+      const sauvegarde = lireSauvegarde(await fichier.text());
+      const date = new Date(sauvegarde.exporteeLe).toLocaleDateString("fr-FR", {
+        day: "numeric",
+        month: "long",
+        year: "numeric"
+      });
+      const confirmation = window.confirm(
+        `Restaurer la sauvegarde du ${date} ? Toutes les données actuelles de Sage sur cet ordinateur seront remplacées.`
+      );
+      if (!confirmation) return;
+      restaurerSauvegarde(sauvegarde);
+      window.location.reload();
+    } catch (erreur) {
+      setSauvegardeErreur(erreur instanceof Error ? erreur.message : "Impossible de lire ce fichier.");
+    }
   }
 
   function formaterTaille(octets: number) {
@@ -470,6 +496,47 @@ export default function ParametresPage() {
           {reglementErreur && (
             <p className="mt-3 rounded-md border border-red-200 bg-red-50 p-3 text-base text-red-900">
               {reglementErreur}
+            </p>
+          )}
+        </section>
+
+        <section className="mt-6 rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+          <h2 className="text-xl font-bold text-slate-950">Sauvegarde de mes données</h2>
+          <p className="mt-2 leading-7 text-slate-700">
+            Enregistrez toutes vos séances, séquences, planning, activités, cours et élèves dans un
+            fichier, pour les conserver en lieu sûr ou les retrouver sur un autre ordinateur. Le
+            fichier contient les données de vos élèves : gardez-le pour vous. Votre clé API Albert
+            n&apos;y figure pas.
+          </p>
+
+          <input
+            ref={sauvegardeRef}
+            type="file"
+            accept="application/json,.json"
+            onChange={(event) => importerSauvegarde(event.target.files?.[0])}
+            className="sr-only"
+          />
+
+          <div className="mt-5 flex flex-wrap gap-3">
+            <button
+              type="button"
+              onClick={exporterSauvegarde}
+              className="rounded-md bg-teal-700 px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-teal-800"
+            >
+              Exporter mes données
+            </button>
+            <button
+              type="button"
+              onClick={() => sauvegardeRef.current?.click()}
+              className="rounded-md border border-slate-300 bg-white px-4 py-3 text-sm font-semibold text-slate-900 shadow-sm transition hover:bg-slate-100"
+            >
+              Restaurer une sauvegarde
+            </button>
+          </div>
+
+          {sauvegardeErreur && (
+            <p className="mt-3 rounded-md border border-red-200 bg-red-50 p-3 text-base text-red-900" role="alert">
+              {sauvegardeErreur}
             </p>
           )}
         </section>

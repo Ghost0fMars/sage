@@ -1,8 +1,16 @@
-const { app, BrowserWindow, shell } = require('electron')
+const { app, BrowserWindow, Notification, shell } = require('electron')
+const { autoUpdater } = require('electron-updater')
 const { spawn } = require('child_process')
 const path = require('path')
 const http = require('http')
 
+// ⚠️ NE JAMAIS CHANGER sans plan de migration : PORT, ainsi que `productName` et
+// `appId` dans package.json. Toutes les données de l'enseignant (séances, séquences,
+// élèves, réglages, clé Albert) vivent dans le localStorage de l'origine
+// http://127.0.0.1:3721, rangé dans le dossier userData (%APPDATA%\Sage sous Windows,
+// ~/.config/Sage sous Linux) dérivé de productName. Modifier l'une de ces valeurs
+// fait « disparaître » toutes les données après une mise à jour automatique.
+// Filet de sécurité : Paramètres › Sauvegarde de mes données (export/import JSON).
 const PORT = 3721
 let mainWindow = null
 let serverProcess = null
@@ -93,7 +101,29 @@ async function createWindow() {
   }
 }
 
-app.whenReady().then(createWindow)
+// Mises à jour automatiques : electron-updater lit latest.yml (Windows) ou
+// latest-linux.yml (AppImage) sur le registre de paquets de la Forge (voir
+// build.publish dans package.json et le job build de .gitlab-ci.yml), télécharge
+// la nouvelle version en arrière-plan et l'installe à la fermeture de l'app.
+function verifierMisesAJour() {
+  autoUpdater.on('error', (err) => console.error('[sage] Mise à jour :', err?.message ?? err))
+  autoUpdater.on('update-downloaded', ({ version }) => {
+    if (!Notification.isSupported()) return
+    new Notification({
+      title: `Sage ${version} est prête`,
+      body: "La mise à jour s'installera à la fermeture de Sage.",
+    }).show()
+  })
+  // Hors ligne ou Forge injoignable : on réessaiera au prochain lancement.
+  autoUpdater.checkForUpdates().catch(() => {})
+}
+
+if (process.platform === 'win32') app.setAppUserModelId('com.alacle.sage')
+
+app.whenReady().then(() => {
+  createWindow()
+  if (app.isPackaged) verifierMisesAJour()
+})
 
 app.on('window-all-closed', () => {
   serverProcess?.kill()

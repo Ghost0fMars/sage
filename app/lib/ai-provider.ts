@@ -1,7 +1,7 @@
 import { headers } from "next/headers";
 
 export const ALBERT_BASE_URL = "https://albert.api.etalab.gouv.fr/v1";
-const ALBERT_DEFAULT_MODEL = process.env.ALBERT_MODEL || "deepseek-v4-flash";
+const ALBERT_DEFAULT_MODEL = process.env.ALBERT_MODEL || "mistral-small-3-2-24b-instruct-2506";
 
 // En-têtes envoyés par le navigateur (clé et modèle choisis dans les paramètres).
 function enteteRequete(nom: string): string {

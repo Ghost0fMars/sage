@@ -74,7 +74,7 @@ Un modèle est fourni dans `.env.example`.
 
 ```env
 ALBERT_API_KEY=votre_cle_api_albert
-ALBERT_MODEL=deepseek-v4-flash
+ALBERT_MODEL=mistral-small-3-2-24b-instruct-2506
 ```
 
 Chaque enseignant saisit sa propre clé dans **Paramètres › Assistant IA**. Elle est stockée sur son appareil et transmise aux routes API (`app/api/.../route.ts`), qui la relaient à Albert. `ALBERT_API_KEY` n'est qu'une clé de repli facultative pour un déploiement maîtrisé.

@@ -174,6 +174,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
             </div>
           </div>
         </div>
+        <p className="-mt-2 px-3 text-xs text-slate-500">Version {process.env.NEXT_PUBLIC_APP_VERSION}</p>
       </div>
     </>
   );

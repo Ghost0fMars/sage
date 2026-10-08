@@ -8,8 +8,6 @@ const MODEL_STORAGE = "sage-albert-model";
 export const ALBERT_KEY_HEADER = "x-albert-key";
 export const ALBERT_MODEL_HEADER = "x-albert-model";
 
-const ROUTES_SANS_CLE = ["/api/delete-account", "/api/notify-signup"];
-
 function lire(cle: string) {
   try {
     return localStorage.getItem(cle) ?? "";
@@ -40,7 +38,7 @@ export function installerFetchAlbert() {
     const chemin = url.startsWith("/") ? url : url.startsWith(window.location.origin) ? new URL(url).pathname : "";
     const cle = lireCleAlbert();
 
-    if (!chemin.startsWith("/api/") || ROUTES_SANS_CLE.some((r) => chemin.startsWith(r)) || !cle) {
+    if (!chemin.startsWith("/api/") || !cle) {
       return fetchOriginal(input, init);
     }
 

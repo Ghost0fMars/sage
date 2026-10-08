@@ -1,10 +1,7 @@
 // Prépare le build Next.js standalone pour l'empaquetage Electron.
 // Lance : next build, puis copie .next/static et public/ dans .next/standalone/
 //
-// L'application desktop tourne toujours en mode 100 % local : aucune variable
-// NEXT_PUBLIC_SUPABASE_* n'est transmise au build (même si .env.local en définit,
-// pour du développement web), donc aucun écran de connexion n'apparaît jamais
-// dans l'app packagée. La clé Albert (.env.electron, non versionné) est copiée
+// La clé Albert (.env.electron, non versionné) est copiée
 // dans le dossier standalone pour être chargée automatiquement par Next au
 // démarrage du serveur embarqué.
 import { execSync } from 'child_process'
@@ -33,17 +30,13 @@ if (!existsSync(join(root, 'public', 'carte', 'data', 'index.json'))) {
   process.exit(1)
 }
 
-console.log('▶ next build (mode local — Supabase désactivé)...')
+console.log('▶ next build...')
 execSync('npx next build', {
   stdio: 'inherit',
   cwd: root,
   env: {
     ...process.env,
-    ELECTRON_BUILD: 'true',
-    // Force le mode local dans le build packagé, quoi que .env.local définisse
-    // par ailleurs pour le développement web avec synchronisation cloud.
-    NEXT_PUBLIC_SUPABASE_URL: '',
-    NEXT_PUBLIC_SUPABASE_ANON_KEY: ''
+    ELECTRON_BUILD: 'true'
   }
 })
 

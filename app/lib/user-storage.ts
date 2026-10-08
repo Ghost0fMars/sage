@@ -1,7 +1,5 @@
 ﻿"use client";
 
-import { saveCloudData } from "./cloud-storage";
-
 export type LocalUser = {
   id: string;
   name: string;
@@ -13,21 +11,6 @@ const DEFAULT_USER: LocalUser = {
   id: "enseignant",
   name: "Enseignant"
 };
-
-export const SYNCED_DATA_KEYS = [
-  "sage-planning-tiles",
-  "sage-prepared-lessons",
-  "sage-student-activities",
-  "sage-course-presentations",
-  "sage-sequences",
-  "sage-students",
-  "sage-events",
-  "sage-evaluations",
-  "sage-student-notes",
-  "sage-student-photos",
-  "sage-reglement-interieur",
-  "sage-classes"
-];
 
 function slugify(value: string) {
   return (
@@ -80,27 +63,6 @@ function storageKeyForUser(userId: string, key: string) {
 }
 
 
-export function ensureLocalUser(user: LocalUser) {
-  const users = readUsers();
-  const existingUser = users.find((storedUser) => storedUser.id === user.id);
-
-  if (existingUser) {
-    localStorage.setItem(
-      USERS_KEY,
-      JSON.stringify(
-        users.map((storedUser) =>
-          storedUser.id === user.id ? { ...storedUser, name: user.name } : storedUser
-        )
-      )
-    );
-  } else {
-    localStorage.setItem(USERS_KEY, JSON.stringify([...users, user]));
-  }
-
-  setCurrentUser(user.id);
-  return user;
-}
-
 export function createUser(name: string) {
   const users = readUsers();
   const baseId = slugify(name);
@@ -120,10 +82,6 @@ export function createUser(name: string) {
 
 export function userStorageKey(key: string) {
   return storageKeyForUser(getCurrentUser().id, key);
-}
-
-export function userStorageKeyForUser(userId: string, key: string) {
-  return storageKeyForUser(userId, key);
 }
 
 export function readUserData<T>(key: string, fallback: T, legacyKey?: string) {
@@ -147,5 +105,4 @@ export function readUserData<T>(key: string, fallback: T, legacyKey?: string) {
 
 export function writeUserData<T>(key: string, value: T) {
   localStorage.setItem(userStorageKey(key), JSON.stringify(value));
-  void saveCloudData(key, value);
 }

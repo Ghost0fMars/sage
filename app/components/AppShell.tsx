@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
-import { supabase, supabaseConfigured } from "../lib/supabase-client";
 import AssistantChat from "./AssistantChat";
 
 const iconProps = {
@@ -75,20 +74,6 @@ const icons = {
       <circle cx="8" cy="15" r="2" />
     </svg>
   ),
-  login: (
-    <svg {...iconProps}>
-      <path d="M8 4H5a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h3" />
-      <path d="M12 6l4 4-4 4" />
-      <path d="M7 10h9" />
-    </svg>
-  ),
-  logout: (
-    <svg {...iconProps}>
-      <path d="M12 4h3a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-3" />
-      <path d="M8 6L4 10l4 4" />
-      <path d="M13 10H4" />
-    </svg>
-  ),
 };
 
 const navigation: { href: string; label: string; icon: React.ReactNode }[] = [
@@ -116,7 +101,6 @@ function readProfile(): Profile {
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const [cloudEmail, setCloudEmail] = useState<string | null>(null);
   const [profile, setProfile] = useState<Profile>({ firstName: "", lastName: "", school: "" });
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -124,32 +108,6 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
     setMobileMenuOpen(false);
     setProfile(readProfile());
   }, [pathname]);
-
-  useEffect(() => {
-    if (!supabase) {
-      return;
-    }
-
-    supabase.auth.getUser().then(({ data }) => {
-      setCloudEmail(data.user?.email ?? null);
-    });
-
-    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
-      setCloudEmail(session?.user.email ?? null);
-    });
-
-    return () => listener.subscription.unsubscribe();
-  }, []);
-
-  async function deconnecter() {
-    if (!supabase) {
-      return;
-    }
-
-    await supabase.auth.signOut();
-    setCloudEmail(null);
-    window.location.href = "/auth";
-  }
 
   const sidebar = (
     <>
@@ -210,20 +168,10 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
               <p className="whitespace-normal break-words text-sm font-semibold leading-5 text-slate-950 [overflow-wrap:anywhere]">
                 {[profile.firstName, profile.lastName].filter(Boolean).join(" ") || "Enseignant"}
               </p>
-              <p className="mt-0.5 whitespace-normal break-words text-xs leading-4 text-slate-500 [overflow-wrap:anywhere]" title={cloudEmail ?? undefined}>
-                {profile.school || cloudEmail || "Données locales"}
+              <p className="mt-0.5 whitespace-normal break-words text-xs leading-4 text-slate-500 [overflow-wrap:anywhere]">
+                {profile.school || "Données locales"}
               </p>
             </div>
-            {supabaseConfigured && cloudEmail && (
-              <button
-                type="button"
-                onClick={deconnecter}
-                title="Se déconnecter"
-                className="shrink-0 grid h-8 w-8 place-items-center rounded-md text-slate-500 transition hover:bg-slate-100 hover:text-slate-950"
-              >
-                {icons.logout}
-              </button>
-            )}
           </div>
         </div>
       </div>

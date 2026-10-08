@@ -9,7 +9,6 @@
 - **public/**
 - **references/**
 - **scripts/**
-- **supabase/**
 
 ## Fichiers
 

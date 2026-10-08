@@ -147,7 +147,7 @@ function estDejaMigree(slide: LegacyOrCurrentSlide): slide is Slide {
 /**
  * Convertit un cours enregistré au format legacy (contenu: string[], media optionnel)
  * vers le format par blocs. Idempotente : un cours déjà migré est retourné tel quel.
- * À appeler à la lecture (localStorage/Supabase), jamais en réécriture forcée.
+ * À appeler à la lecture (localStorage), jamais en réécriture forcée.
  */
 export function migrerCoursLegacy(
   course: Omit<CoursPresentation, "slides"> & { slides: LegacyOrCurrentSlide[] }

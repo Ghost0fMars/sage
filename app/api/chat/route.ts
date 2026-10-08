@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
 import { callAlbert } from "../../lib/ai-provider";
 import { citer, lienPdf, rechercher, type Passage } from "../../lib/corpus";
 
@@ -12,56 +11,6 @@ type ChatRequest = {
   messages: Message[];
   context: string;
 };
-
-function getBearerToken(request: NextRequest) {
-  const authorization = request.headers.get("authorization");
-  return authorization?.startsWith("Bearer ") ? authorization.slice("Bearer ".length) : null;
-}
-
-async function verifierUtilisateur(request: NextRequest) {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-  const token = getBearerToken(request);
-
-  // Clé Albert personnelle fournie par l'enseignant : elle paie ses propres appels, le compte
-  // validé n'est exigé que pour protéger la clé partagée du serveur.
-  if (request.headers.get("x-albert-key")?.trim()) {
-    return { user: null } as const;
-  }
-
-  if (!supabaseUrl || !supabaseAnonKey) {
-    // Application locale (Electron) sans Supabase configuré : pas de compte à
-    // vérifier, l'accès à l'assistant est ouvert (comme le reste de l'app).
-    return { user: null } as const;
-  }
-
-  if (!token) {
-    return { error: "Connexion requise pour utiliser l'assistant.", status: 401 } as const;
-  }
-
-  const supabase = createClient(supabaseUrl, supabaseAnonKey, {
-    global: {
-      headers: { Authorization: `Bearer ${token}` }
-    }
-  });
-  const { data, error } = await supabase.auth.getUser();
-
-  if (error || !data.user) {
-    return { error: "Session invalide. Reconnectez-vous.", status: 401 } as const;
-  }
-
-  const { data: access } = await supabase
-    .from("user_access")
-    .select("status")
-    .eq("user_id", data.user.id)
-    .maybeSingle();
-
-  if (access?.status !== "approved") {
-    return { error: "Votre compte doit être validé pour utiliser l'assistant.", status: 403 } as const;
-  }
-
-  return { user: data.user } as const;
-}
 
 async function rechercherDocumentation(question: string): Promise<Passage[]> {
   // corpus absent (non indexé) : l'assistant répond sans documentation
@@ -118,11 +67,6 @@ export async function POST(request: NextRequest) {
   const userPrompt = historique
     ? `[Historique de la conversation]\n${historique}\n\n[Nouveau message]\nEnseignant : ${dernierMessage}`
     : dernierMessage;
-
-  const auth = await verifierUtilisateur(request);
-  if ("error" in auth) {
-    return NextResponse.json({ error: auth.error }, { status: auth.status });
-  }
 
   const passages = await rechercherDocumentation(dernierMessage);
   const docContext = passages.map((p) => citer(p, 1200)).join("\n\n---\n\n");

@@ -1,7 +1,6 @@
 ﻿"use client";
 
 import { useEffect, useRef, useState } from "react";
-import { supabase } from "../lib/supabase-client";
 import { readUserData } from "../lib/user-storage";
 
 type Message = {
@@ -238,13 +237,7 @@ export default function AssistantChat() {
     setStreaming(true);
 
     try {
-      const { data } = supabase ? await supabase.auth.getSession() : { data: { session: null } };
-      const token = data.session?.access_token;
-
       const headers: Record<string, string> = { "Content-Type": "application/json" };
-      if (token) {
-        headers["Authorization"] = `Bearer ${token}`;
-      }
 
       const response = await fetch("/api/chat", {
         method: "POST",

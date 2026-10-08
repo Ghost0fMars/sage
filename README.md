@@ -14,7 +14,7 @@ Développée avec Next.js, TypeScript et Tailwind CSS.
 
 **En application de bureau (recommandé, voir ci-dessous)**, SAGE fonctionne en local : les données des élèves restent sur la machine de l'enseignant (navigateur/stockage local de l'app), sans compte ni service cloud. Seul le texte envoyé à l'assistant IA transite par **Albert API** (DINUM/Etalab), hébergée par l'État français (SecNumCloud).
 
-**En version web** (`npm run dev`/déploiement navigateur), SAGE peut en plus faire transiter des données par un service hébergé (Supabase) si celui-ci est configuré. **Pendant la bêta, n'entrez pas de données réelles permettant d'identifier des élèves** (noms, prénoms, évaluations nominatives) dans ce mode. Utilisez des données de test ou anonymisées (« Élève 1 », « Élève 2 »…).
+**En version web** (`npm run dev`/déploiement navigateur), les données restent de même dans le navigateur de l'enseignant (stockage local), sans compte. **Pendant la bêta, n'entrez pas de données réelles permettant d'identifier des élèves** (noms, prénoms, évaluations nominatives). Utilisez des données de test ou anonymisées (« Élève 1 », « Élève 2 »…).
 
 Dans tous les modes : ne collez jamais de données personnelles non anonymisées dans l'assistant IA sans nécessité, la souveraineté de l'hébergement ne dispense pas de la minimisation des données.
 
@@ -43,7 +43,6 @@ Dans tous les modes : ne collez jamais de données personnelles non anonymisées
 - **TypeScript**
 - **Tailwind CSS**
 - **Albert API** (DINUM / Etalab) — génération de contenu pédagogique, IA souveraine hébergée par l'État
-- **Supabase** — persistance (en cours de remplacement, cf. feuille de route)
 - **Electron** — empaquetage application de bureau (en cours)
 
 ---
@@ -52,7 +51,6 @@ Dans tous les modes : ne collez jamais de données personnelles non anonymisées
 
 - **Node.js** 18 ou supérieur et **npm**
 - Une **clé API Albert** (agents publics uniquement — voir [albert.api.etalab.gouv.fr](https://albert.api.etalab.gouv.fr)), configurée côté serveur
-- Un **projet Supabase** (le temps de la migration vers un stockage local)
 
 ---
 
@@ -80,20 +78,6 @@ ALBERT_MODEL=deepseek-v4-flash
 ```
 
 La clé reste côté serveur grâce aux routes API (`app/api/.../route.ts`) et n'est jamais exposée au navigateur. Il n'y a plus de modèle BYOK : tous les enseignants utilisent la même clé Albert, gérée par l'administrateur du service.
-
-### Supabase
-
-Créez un projet sur [supabase.com](https://supabase.com), puis récupérez l'URL et les clés dans **Project Settings → API** :
-
-```env
-NEXT_PUBLIC_SUPABASE_URL=https://votre-projet.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=votre_cle_anon
-SUPABASE_SERVICE_ROLE_KEY=votre_cle_service_role
-```
-
-> 🔐 **`SUPABASE_SERVICE_ROLE_KEY` est une clé d'administration : elle contourne les Row Level Security policies.** Elle ne doit être lue que dans des routes serveur, jamais exposée côté client ni embarquée dans un build distribué.
-
-Le schéma de base de données se trouve dans le dossier `supabase/`.
 
 ---
 
@@ -129,7 +113,7 @@ C'est le mode d'usage visé : un enseignant installe SAGE comme une application 
 
 ### Comment ça marche
 
-- `scripts/electron-prepare.mjs` construit Next.js en mode `standalone` en forçant les variables `NEXT_PUBLIC_SUPABASE_*` à vide (même si `.env.local` en définit pour le développement web) : le build packagé n'affiche donc **jamais** d'écran de connexion, quoi qu'il arrive. Il copie ensuite `.env.electron` dans le dossier standalone (`albert.env`).
+- `scripts/electron-prepare.mjs` construit Next.js en mode `standalone`, puis copie `.env.electron` dans le dossier standalone (`albert.env`).
 - Au lancement, `electron/main.js` démarre ce serveur Next.js en local (`127.0.0.1`, port interne) et ouvre une fenêtre native pointant dessus — `electron/server-runner.js` charge `albert.env` avant de démarrer le serveur.
 - `npm run electron:dev` permet de tester ce comportement en développement (fenêtre Electron + `next dev`).
 
@@ -158,7 +142,6 @@ app/
 public/carte/                   Carte des guides : page, PDF (référentiels/) et index (data/)
 scripts/build_index.py          Indexation des PDF (npm run index-corpus)
 electron/                       Empaquetage application de bureau
-supabase/                       Schéma de base de données
 Référentiel_de_compétences.json Données du référentiel (issu de l'ancien Excel)
 ```
 

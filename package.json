@@ -17,7 +17,6 @@
     "electron:dist:mac": "node scripts/electron-prepare.mjs && cross-env CSC_IDENTITY_AUTO_DISCOVERY=false electron-builder --mac --publish=never"
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2.105.1",
     "next": "14.2.5",
     "pdfjs-dist": "^6.1.200",
     "react": "18.3.1",
